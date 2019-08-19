@@ -1,0 +1,71 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:PopupPage
+    xmlns:pages="clr-namespace:Rg.Plugins.Popup.Pages;assembly=Rg.Plugins.Popup" xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:animations="clr-namespace:Rg.Plugins.Popup.Animations;assembly=Rg.Plugins.Popup"
+    xmlns:xforms="clr-namespace:Syncfusion.SfRating.XForms;assembly=Syncfusion.SfRating.XForms"
+    mc:Ignorable="d"
+             x:Class="NasiyeDriver.Components.TripPopUp">
+    <pages:PopupPage.Animation>
+        <animations:ScaleAnimation 
+            PositionIn="Center"
+            PositionOut="Center"
+            ScaleIn="1.2"
+            ScaleOut="0.8"
+            DurationIn="400"
+            DurationOut="300"
+            EasingIn="SinOut"
+            EasingOut="SinIn"
+            HasBackgroundAnimation="True"/>
+    </pages:PopupPage.Animation>
+    <StackLayout 
+        VerticalOptions="Center" 
+        BackgroundColor="White"
+        HorizontalOptions="Center" 
+        HeightRequest="250"
+        WidthRequest="250"
+        Spacing="0"
+        Padding="10">
+        <Label x:Name="name"
+               FontSize="20"
+               FontAttributes="Bold"
+               HorizontalOptions="CenterAndExpand"
+               VerticalOptions="CenterAndExpand"
+               Text="Test"/>
+               
+        <xforms:SfRating 
+                x:Name="rating"
+                ItemCount="5"
+                Value="3"
+                ItemSize="15"
+                Precision="Standard" 
+                ItemSpacing="15"
+                VerticalOptions="CenterAndExpand" 
+                HorizontalOptions="CenterAndExpand"
+                />
+
+        <Label x:Name="type"
+               FontSize="16"
+               HorizontalOptions="CenterAndExpand"
+               Text="Test"/>
+        
+        <Label x:Name="timer"
+               FontAttributes="Bold"
+               TextColor="Red"
+               FontSize="18"
+               HorizontalOptions="CenterAndExpand"
+               VerticalOptions="CenterAndExpand"
+               Text="Test"/>
+
+        <StackLayout HorizontalOptions="CenterAndExpand"  VerticalOptions="EndAndExpand" Orientation="Horizontal">
+
+            <Button x:Name="accept" Clicked="Accept_Clicked" BackgroundColor="#64e291" TextColor="White" Text="Accept" HorizontalOptions="Center" VerticalOptions="EndAndExpand"/>
+
+            <Button x:Name="cancel" Clicked="Cancel_Clicked" BackgroundColor="#c83660" TextColor="White" Text="Decline" HorizontalOptions="Center" VerticalOptions="EndAndExpand" />
+            
+        </StackLayout>
+
+    </StackLayout>
+</pages:PopupPage>

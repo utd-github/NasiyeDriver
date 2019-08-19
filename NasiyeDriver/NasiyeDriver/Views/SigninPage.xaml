@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local1="clr-namespace:NasiyeDriver.Controllers"
+             mc:Ignorable="d"
+             x:Class="NasiyeDriver.Views.SigninPage">
+    <ContentPage.Content>
+        <ScrollView Padding="0" Margin="0">
+            <StackLayout Padding="0,20,0,0" Margin="0">
+                <ActivityIndicator 
+                    x:Name="loader"
+                    IsVisible="False" 
+                    WidthRequest="100" 
+                    HeightRequest="100"
+                    IsEnabled="True"
+                    VerticalOptions="CenterAndExpand"
+                    HorizontalOptions="CenterAndExpand" />
+                <Frame x:Name="container" 
+                    HasShadow="False" 
+                       Padding="20,10" 
+                       CornerRadius="10"
+                       BackgroundColor="White"
+                       Margin="20,10">
+                    <StackLayout Spacing="10" Padding="10">
+                        <Label Text="Welcome back!"
+                               HorizontalOptions="Center"
+                               FontAttributes="Bold"
+                               FontSize="Large"
+                         />
+                        <Label Text="Sign in"
+                               HorizontalOptions="Center"
+                         />
+                        <Entry x:Name="emailtxt"
+                               Keyboard="Email"
+                               Placeholder="Email"
+                               >
+                            <Entry.Behaviors>
+                                <local1:EmailValidatorBehavior x:Name="emailValidator"/>
+                            </Entry.Behaviors>
+                        </Entry>
+                        <Entry x:Name="passwordtxt"
+                               IsPassword="True"
+                               Placeholder="Password"
+                                                            
+                       />
+
+                        <Button x:Name="signin"
+                                Clicked="Signin_Clicked"
+                                Text="Sign in"
+                                CornerRadius="5"
+                                TextColor="White"
+                                Margin="10,20"
+                                BackgroundColor="Accent"
+                            />
+
+                        <BoxView BackgroundColor="Gray"
+                                 Margin="10,10" 
+                                 HeightRequest="0.5" />
+
+                        <StackLayout
+                                     HorizontalOptions="CenterAndExpand">
+                            <Label Text="Don't have an account?" />
+                            <Button Text="Sign up"
+                                    Clicked="Signup_Clicked"
+                                    Margin="10,10" 
+                                    CornerRadius="5"
+                                    BackgroundColor="Transparent"
+                                    x:Name="signup"
+                                    TextColor="Black"/>
+                        </StackLayout>
+                    </StackLayout>
+                </Frame>
+            </StackLayout>
+        </ScrollView>
+    </ContentPage.Content>
+</ContentPage>

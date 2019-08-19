@@ -1,0 +1,98 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<MasterDetailPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                  xmlns:localm="clr-namespace:NasiyeDriver.Models"
+                  xmlns:localv="clr-namespace:NasiyeDriver.Views"
+                  mc:Ignorable="d"
+             x:Class="NasiyeDriver.MainPage">
+
+    <MasterDetailPage.Master>
+        <ContentPage Title="Menu">
+            <StackLayout BackgroundColor="White">
+                <StackLayout>
+                    <StackLayout Padding="15">
+                        <Image x:Name="userimage"
+                               Source="Assets/image.png"
+                               HeightRequest="100"
+                               WidthRequest="100" 
+                               VerticalOptions="CenterAndExpand"
+                               HorizontalOptions="CenterAndExpand"
+                              />
+                        <Label x:Name="username"
+                               Text="Full Name"
+                               FontSize="18"
+                               VerticalOptions="CenterAndExpand"                    
+                               HorizontalOptions="CenterAndExpand" />
+                    </StackLayout>
+                    <StackLayout Orientation="Horizontal" Padding="10">
+                        <Label x:Name="userrating"
+                               Text="Rating" 
+                               FontSize="18"
+                               HorizontalOptions="CenterAndExpand"
+                               />
+                        <Label x:Name="usertrips"
+                               Text="Trips" 
+                               HorizontalOptions="CenterAndExpand"
+                               FontSize="18"/>
+                    </StackLayout>
+                </StackLayout>
+                <StackLayout >
+                    <ListView
+                        x:Name="MenuItemList"
+                        x:FieldModifier="public"
+                        ItemSelected="MenuItemList_ItemSelected">
+                        <ListView.ItemsSource>
+                            <x:Array Type="{x:Type localm:MasterDetailListItem}">
+                                <localm:MasterDetailListItem
+                                    Title="Home"
+                                    IconSource="Assets/home.png"
+                                    TargetType="{x:Type localv:HomePage}" />
+                                <localm:MasterDetailListItem
+                                    Title="My Trips"
+                                    IconSource="Assets/trips.png"
+                                    TargetType="{x:Type localv:TripsPage}" />
+                                <localm:MasterDetailListItem
+                                    Title="Emergency Contacts"
+                                    IconSource="Assets/emergency.png"
+                                    TargetType="{x:Type localv:EmergencyContactsPage}" />
+                                <localm:MasterDetailListItem
+                                    Title="Help"
+                                    IconSource="Assets/help.png"
+                                    TargetType="{x:Type localv:HelpPage}" />
+                            </x:Array>
+                        </ListView.ItemsSource>
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <ViewCell>
+                                    <Grid Padding="5,10">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="30" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Image Source="{Binding IconSource}" />
+                                        <Label
+                                            Grid.Column="1"
+                                            FontSize="18"
+                                            Text="{Binding Title}"
+                                            TextColor="{Binding TextColor}"
+                                            VerticalTextAlignment="Center" />
+                                    </Grid>
+                                </ViewCell>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </StackLayout>
+            </StackLayout>
+        </ContentPage>
+    </MasterDetailPage.Master>
+    <MasterDetailPage.Detail>
+        <NavigationPage>
+            <x:Arguments>
+                <localv:HomePage/>
+            </x:Arguments>
+        </NavigationPage>
+    </MasterDetailPage.Detail>
+
+</MasterDetailPage>

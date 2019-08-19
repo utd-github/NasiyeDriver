@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "212962839266",
+    "firebase_url": "https://nasiyebooking.firebaseio.com",
+    "project_id": "nasiyebooking",
+    "storage_bucket": "nasiyebooking.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:212962839266:android:fd130d0c55d2f0b7",
+        "android_client_info": {
+          "package_name": "com.utd.NasiyeDriver"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "212962839266-qmvgnltktoa4eromtij8ri59i272ra0f.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDcp5uXg2AEFZhqtHK925gY5Tk01RkuzZc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "212962839266-qmvgnltktoa4eromtij8ri59i272ra0f.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

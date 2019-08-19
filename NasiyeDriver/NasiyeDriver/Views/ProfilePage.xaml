@@ -1,0 +1,82 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             Title="Profile"
+             x:Class="NasiyeDriver.Views.ProfilePage">
+    <ContentPage.Content>
+        <ScrollView Padding="0">
+            <StackLayout Spacing="0" Margin="0,00,0,0" Padding="20,10,20,90">
+                <Frame CornerRadius="50" 
+                        HeightRequest="120"
+                        WidthRequest="120"
+                        Padding="0"
+                        Margin="0"
+                        VerticalOptions="CenterAndExpand"
+                        HorizontalOptions="CenterAndExpand"
+                        >
+                    <Image x:Name="userimage" 
+                           Source="Assets/image.png"
+                            Margin="0"
+                            IsEnabled="False"/>
+
+                </Frame>
+               
+                <Frame >
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="30" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Image Source="Assets/user.png" />
+                        <Entry x:Name="ename"
+                            Grid.Column="1"
+                            FontSize="20"
+                            Text="Full name"
+                            IsEnabled="False"
+                            />
+                    </Grid>
+                </Frame>    
+                <Frame >
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="30" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Image Source="Assets/email.png" />
+                        <Entry x:Name="eemail"
+                            Grid.Column="1"
+                            Text="Example@gmail.com"
+                            IsEnabled="False"
+                            />
+                    </Grid>
+                </Frame>
+                <Frame >
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="30" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Image Source="Assets/phone.png" />
+                        <Entry x:Name="ephone"
+                            Grid.Column="1"
+                            Text="+25290XXXXXX"
+                            IsEnabled="False"
+                            />
+                    </Grid>
+                </Frame>
+                <StackLayout Margin="20">
+                    <Button x:Name="signout" 
+                            Clicked="Signout_Clicked" 
+                            Text="Sign out" BackgroundColor="Accent" 
+                            TextColor="White"/>
+                   
+
+                </StackLayout>
+            </StackLayout>
+
+        </ScrollView>
+    </ContentPage.Content>
+</ContentPage>
