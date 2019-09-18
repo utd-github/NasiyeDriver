@@ -9,6 +9,8 @@ namespace NasiyeDriver
 {
     public partial class App : Application
     {
+        public readonly IFirebaseDBInterface _firebaseDatabase;
+
         public App()
         {
             Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("MTI1OTgzQDMxMzcyZTMyMmUzMFhldFRrMmk3SWdoY3g2bEFBd29yNWJRNlRib3RWK3lITWszbW1tRlozdW89");
@@ -16,6 +18,7 @@ namespace NasiyeDriver
             InitializeComponent();
 
             NetworkAccess current = Connectivity.NetworkAccess;
+            _firebaseDatabase = DependencyService.Get<IFirebaseDBInterface>();
 
 
             if (current == NetworkAccess.Internet)
@@ -29,13 +32,13 @@ namespace NasiyeDriver
                 }
                 else
                 {
-                    MainPage = new NavigationPage(new WelcomePage(true));
+                    MainPage = new NavigationPage(new WelcomePage());
                 }
 
             }
             else
             {
-                MainPage = new NavigationPage(new WelcomePage(false));
+                MainPage = new NavigationPage(new CheckPage());
             }
 
 
@@ -46,9 +49,27 @@ namespace NasiyeDriver
             // Handle when your app starts
         }
 
-        protected override void OnSleep()
+        protected async override void OnSleep()
         {
+            NetworkAccess current = Connectivity.NetworkAccess;
+
             // Handle when your app sleeps
+            if (current == NetworkAccess.Internet)
+            {
+
+                var auth = await DependencyService.Get<IFirebaseAuthInterface>().GetCurrentUser();
+
+                if (auth != null)
+                {
+                    _firebaseDatabase.CancelRequest(auth);
+                    _firebaseDatabase.GetOffline(auth);
+                }
+                else
+                {
+                   
+                }
+
+            }
         }
 
         protected override void OnResume()

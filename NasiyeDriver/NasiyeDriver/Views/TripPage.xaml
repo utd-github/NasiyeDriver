@@ -1,0 +1,250 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:NasiyeDriver.CustomRenderers"
+             xmlns:xforms="clr-namespace:Syncfusion.SfRating.XForms;assembly=Syncfusion.SfRating.XForms"
+             mc:Ignorable="d"
+             Title="On Trip"
+             NavigationPage.HasBackButton="False"
+             x:Class="NasiyeDriver.Views.TripPage">
+    <ContentPage.Content>
+        <AbsoluteLayout>
+            <local:CustomMap
+                  x:Name="mainmap"
+                  MapType="Street"
+                  IsVisible="False"
+                  AbsoluteLayout.LayoutBounds=".5,0,500,800"
+                 />
+            <Grid x:Name="infobox"
+                  AbsoluteLayout.LayoutBounds=".5,0,.98,.14" 
+                  AbsoluteLayout.LayoutFlags="All" 
+                  BackgroundColor="White">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="30*" />
+                    <ColumnDefinition Width="35*" />
+                    <ColumnDefinition Width="35*" />
+                </Grid.ColumnDefinitions>
+                <Image x:Name="userimage"
+                            Grid.Column="0"
+                            Source="Assets/image.png"
+                            HeightRequest="150"
+                            WidthRequest="150" 
+                            />
+                <StackLayout Grid.Column="1" Padding="0,5,0,0">
+                    <Label x:Name="username" FontSize="15" Text="User name" />
+                    <Label x:Name="userphone" FontSize="15" Text="User phone"/>
+                    <xforms:SfRating 
+                                x:Name="userrating"
+                                ItemCount="5"
+                                Value="3"
+                                IsEnabled="False"
+                                ItemSize="10"
+                                Precision="Standard" 
+                                ItemSpacing="12"
+                                VerticalOptions="CenterAndExpand" 
+                                HorizontalOptions="CenterAndExpand"
+                                />
+                </StackLayout>
+                <StackLayout Grid.Column="2" >
+                    <Button x:Name="calluser"
+                            Margin="10"
+                            Clicked="Calluser_Clicked"
+                            Text="Call"
+                            BackgroundColor="Accent"
+                            TextColor="white"
+                            CornerRadius="5"
+                            VerticalOptions="CenterAndExpand"
+                            HorizontalOptions="CenterAndExpand"
+                            WidthRequest="300"
+                            />
+                </StackLayout>
+            </Grid>
+
+
+            <Frame AbsoluteLayout.LayoutBounds=".5,.15,.50,.050" 
+                         AbsoluteLayout.LayoutFlags="All"
+                         BackgroundColor="White" 
+                         x:Name="statusbar"
+                         CornerRadius="8"
+                         Padding="5">
+                <StackLayout Orientation="Horizontal">
+                    <Label Grid.Column="1"
+                           HorizontalTextAlignment="Center"
+                           VerticalTextAlignment="Center"
+                           FontAttributes="Bold"
+                           HorizontalOptions="CenterAndExpand"
+                           VerticalOptions="CenterAndExpand"
+                           FontSize="18"
+                           x:Name="status"
+                           Text=""/>
+                </StackLayout>
+            </Frame>
+
+            <Frame AbsoluteLayout.LayoutBounds=".5,.21,.50,.050" 
+                         AbsoluteLayout.LayoutFlags="All"
+                         BackgroundColor="White" 
+                         x:Name="timersbar"
+                         CornerRadius="8"
+                         Padding="5">
+                <StackLayout Orientation="Horizontal">
+                    <Label Grid.Column="1"
+                           HorizontalTextAlignment="Center"
+                           VerticalTextAlignment="Center"
+                           FontAttributes="Bold"
+                           HorizontalOptions="CenterAndExpand"
+                           VerticalOptions="CenterAndExpand"
+                           FontSize="18"
+                           x:Name="timer"
+                           Text="00:00"/>
+                </StackLayout>
+            </Frame>
+            
+            
+
+
+            <ActivityIndicator x:Name="maploading"
+                                   IsRunning="True"
+                                   AbsoluteLayout.LayoutFlags="All"
+                                   AbsoluteLayout.LayoutBounds=".5,.5,.25,.25"
+                                   HorizontalOptions="CenterAndExpand"                              
+                                   VerticalOptions="CenterAndExpand" />
+            <Frame AbsoluteLayout.LayoutBounds=".5,.999,.99,.27" 
+                   AbsoluteLayout.LayoutFlags="All"
+                   BackgroundColor="White" 
+                   x:Name="ftripcon"
+                   Padding="10">
+                <StackLayout >
+                    <ActivityIndicator x:Name="loader"
+                                       Color="Accent"  
+                                       HorizontalOptions="CenterAndExpand" 
+                                       VerticalOptions="CenterAndExpand"
+                                       IsRunning="True"
+                                       />
+                    <StackLayout  
+                        x:Name="iconsbox"
+                        IsVisible="False"
+                        Orientation="Horizontal" 
+                        Spacing="40">
+                        <StackLayout HorizontalOptions="CenterAndExpand">
+                            <Image Source="Assets/distanation.png"
+                                       HeightRequest="50"
+                                       WidthRequest="50" 
+                                       HorizontalOptions="CenterAndExpand"/>
+                            <Label x:Name="distance" Text="00 KM" HorizontalOptions="CenterAndExpand"/>
+                        </StackLayout>
+
+                        <StackLayout HorizontalOptions="CenterAndExpand">
+                            <Image Source="Assets/time.png"
+                                       HeightRequest="50"
+                                       WidthRequest="50" 
+                                       HorizontalOptions="CenterAndExpand"/>
+                            <Label x:Name="duration" Text="00 Secs" HorizontalOptions="CenterAndExpand"/>
+                        </StackLayout>
+
+                        <StackLayout HorizontalOptions="CenterAndExpand">
+                            <Image Source="Assets/payments.png"
+                                       HeightRequest="50"
+                                       WidthRequest="50" 
+                                       HorizontalOptions="CenterAndExpand"/>
+                            <Label Text="0.0 $" x:Name="amount" HorizontalOptions="CenterAndExpand"/>
+                        </StackLayout>
+                    </StackLayout>
+                    <StackLayout x:Name="wcon"
+                        IsVisible="False"
+                        Orientation="Horizontal" 
+                        HorizontalOptions="CenterAndExpand">
+
+                        <Button x:Name="ontheway"
+                            Clicked="Ontheway_Clicked"
+                            Text="On the way"
+                            BackgroundColor="Accent"
+                            TextColor="white"
+                            CornerRadius="5"
+                            VerticalOptions="CenterAndExpand"
+                            HorizontalOptions="CenterAndExpand"
+                            WidthRequest="150"
+                            />
+
+                        <Button x:Name="arived"
+                            Clicked="Arived_Clicked"
+                            Text="Arrived"
+                            IsVisible="False"
+                            BackgroundColor="Accent"
+                            TextColor="white"
+                            CornerRadius="5"
+                            VerticalOptions="FillAndExpand"
+                            HorizontalOptions="FillAndExpand"
+                            WidthRequest="150"
+                            />
+
+                        <Button x:Name="start"
+                            Clicked="Startstrip_Clicked"
+                            Text="Start Trip"
+                            IsVisible="False"
+                            BackgroundColor="Accent"
+                            TextColor="white"
+                            CornerRadius="5"
+                            VerticalOptions="FillAndExpand"
+                            HorizontalOptions="FillAndExpand"
+                            WidthRequest="150"
+                            />
+
+                        <Button x:Name="canceltrip"
+                            Clicked="Canceltrip_Clicked"
+                            Text="Cancel"
+                            BackgroundColor="#ff502f"
+                            TextColor="white"
+                            WidthRequest="150"
+                            CornerRadius="5"
+                            VerticalOptions="CenterAndExpand"
+                            HorizontalOptions="CenterAndExpand"
+                            />
+
+                    </StackLayout>
+                    
+                    <StackLayout x:Name="trpinfocon"
+                        IsVisible="False"
+                        HorizontalOptions="CenterAndExpand" 
+                        Orientation="Horizontal">
+                        
+                        <Button x:Name="pausetrip"
+                            Clicked="Pausetrip_Clicked"
+                            Text="Pause Trip"
+                            BackgroundColor="Accent"
+                            TextColor="white"
+                            CornerRadius="5"
+                            VerticalOptions="CenterAndExpand"
+                            HorizontalOptions="CenterAndExpand"
+                            WidthRequest="150"
+                            />
+
+                        <Button x:Name="rstart"
+                            Clicked="Startstrip_Clicked"
+                            Text="Start Trip"
+                            IsVisible="False"
+                            BackgroundColor="Accent"
+                            TextColor="white"
+                            CornerRadius="5"
+                            VerticalOptions="FillAndExpand"
+                            HorizontalOptions="FillAndExpand"
+                            WidthRequest="150"
+                            />
+
+                        <Button x:Name="endtrip"
+                            Clicked="Endtrip_Clicked"
+                            Text="End Trip"
+                            BackgroundColor="#ff502f"
+                            TextColor="white"
+                            WidthRequest="150"
+                            CornerRadius="5"
+                            VerticalOptions="CenterAndExpand"
+                            HorizontalOptions="CenterAndExpand"
+                            />
+                    </StackLayout>
+                </StackLayout>
+            </Frame>
+        </AbsoluteLayout>
+    </ContentPage.Content>
+</ContentPage>

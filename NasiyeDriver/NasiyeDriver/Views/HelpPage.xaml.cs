@@ -16,5 +16,19 @@ namespace NasiyeDriver.Views
         {
             InitializeComponent();
         }
+
+        private void WebView_Navigated(object sender, WebNavigatedEventArgs e)
+        {
+            loader.IsVisible = false;
+            webview.IsVisible = true;
+
+        }
+
+        private void Webview_Navigating(object sender, WebNavigatingEventArgs e)
+        {
+            loader.IsVisible = true;
+            webview.IsVisible = false;
+
+        }
     }
 }

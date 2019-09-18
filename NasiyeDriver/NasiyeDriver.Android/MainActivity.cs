@@ -14,10 +14,16 @@ using Plugin.CurrentActivity;
 using Plugin.Permissions;
 using System.Threading.Tasks;
 using System.IO;
+using Plugin.LocalNotifications;
 
 namespace NasiyeDriver.Droid
 {
-    [Activity(Label = "NasiyeDriver", Icon = "@mipmap/icon", Theme = "@style/Splashscreen", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
+    [Activity(Label = "NasiyeDriver", 
+        Icon = "@mipmap/icon", 
+        Theme = "@style/Splashscreen", 
+        MainLauncher = true, 
+        ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
+
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
         public static readonly int PickImageId = 1000;
@@ -52,7 +58,7 @@ namespace NasiyeDriver.Droid
 
 
             CrossCurrentActivity.Current.Init(this, savedInstanceState);
-
+            LocalNotificationsImplementation.NotificationIconId = Resource.Drawable.logo;
 
             LoadApplication(new App());
 

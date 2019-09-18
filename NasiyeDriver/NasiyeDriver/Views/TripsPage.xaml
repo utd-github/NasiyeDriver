@@ -4,12 +4,89 @@
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
+             Title="My trips"
              x:Class="NasiyeDriver.Views.TripsPage">
     <ContentPage.Content>
-        <StackLayout>
-            <Label Text="Welcome to Xamarin.Forms!"
-                VerticalOptions="CenterAndExpand" 
-                HorizontalOptions="CenterAndExpand" />
+        <StackLayout >
+            <Label x:Name="info"
+                   HorizontalOptions="CenterAndExpand"
+                   VerticalOptions="CenterAndExpand"
+                   IsVisible="False"
+                   Text="No Trips found!"
+                   />
+            <ListView Grid.Row="1"
+                          RowHeight="100"
+                          x:Name="tripsList"
+                          x:FieldModifier="public"
+                          IsRefreshing="True"
+                          SeparatorVisibility="None"
+                          ItemSelected="TripsList_ItemSelected">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ViewCell>
+                            <ContentView>
+                                <Grid Grid.Row="0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="20*"/>
+                                        <ColumnDefinition Width="60*"/>
+                                        <ColumnDefinition Width="20*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Grid Grid.Column="0">
+                                        <Image Source="{Binding User.Image}" Aspect="AspectFill"/>
+                                    </Grid>
+
+                                    <StackLayout Grid.Column="1" Padding="5,5,0,0">
+                                        <Label Text="{Binding User.Name}" 
+                                               FontSize="20" 
+                                            />
+                                        <StackLayout Orientation="Horizontal">
+
+                                            <StackLayout HorizontalOptions="StartAndExpand">
+                                                <Label Text="Date" />
+                                                <Label Text="{Binding Date}" FontSize="18" FontAttributes="Bold"/>
+                                            </StackLayout>
+
+                                            <StackLayout HorizontalOptions="CenterAndExpand" >
+                                                <Label Text="Duration" />
+                                                <Label Text="{Binding Duration}" FontSize="18" FontAttributes="Bold"/>
+                                            </StackLayout>
+
+                                        </StackLayout>
+                                    </StackLayout>
+                                    <StackLayout HorizontalOptions="FillAndExpand" Grid.Column="2">
+                                        <Label Text="Amount"  
+                                       HorizontalOptions="FillAndExpand" 
+                                       VerticalOptions="FillAndExpand" 
+                                       VerticalTextAlignment="Center" 
+                                       FontSize="12"/>
+                                        <Label Text="{Binding Amount}" 
+                                       HorizontalOptions="FillAndExpand" 
+                                       VerticalOptions="FillAndExpand" 
+                                       VerticalTextAlignment="Center" 
+                                       FontSize="18"/>
+                                        <Label Text="Payment"  
+                                       HorizontalOptions="FillAndExpand" 
+                                       VerticalOptions="FillAndExpand" 
+                                       VerticalTextAlignment="Center" 
+                                       FontSize="12"/>
+                                        <Label Text="{Binding Payment}" 
+                                       HorizontalOptions="FillAndExpand" 
+                                       VerticalOptions="FillAndExpand" 
+                                       VerticalTextAlignment="Center" 
+                                       FontSize="18"/>
+                                    </StackLayout>
+
+
+                                </Grid>
+                            </ContentView>
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
+
         </StackLayout>
+
     </ContentPage.Content>
 </ContentPage>

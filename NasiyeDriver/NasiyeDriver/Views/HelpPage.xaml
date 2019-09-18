@@ -4,12 +4,18 @@
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
+             Title="Nasiye Services"
              x:Class="NasiyeDriver.Views.HelpPage">
     <ContentPage.Content>
-        <StackLayout>
-            <Label Text="Welcome to Xamarin.Forms!"
-                VerticalOptions="CenterAndExpand" 
-                HorizontalOptions="CenterAndExpand" />
-        </StackLayout>
+        <Grid>
+            <StackLayout x:Name="loader">
+                <ActivityIndicator IsRunning="True" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand" />
+            </StackLayout>
+            <WebView x:Name="webview"
+                     Source="http://nasiyeservices.com/" 
+                     Navigated="WebView_Navigated"
+                     Navigating="Webview_Navigating"
+                     IsVisible="False"/> 
+        </Grid>
     </ContentPage.Content>
 </ContentPage>

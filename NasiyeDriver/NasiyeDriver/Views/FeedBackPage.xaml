@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             Title="Feedback"
+             x:Class="NasiyeDriver.Views.FeedBackPage">
+    <ContentPage.Content>
+        <Grid Padding="10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="10*" />
+                <RowDefinition  Height="82*" />
+                <RowDefinition Height="8*" />
+            </Grid.RowDefinitions>
+           
+            <Picker Grid.Row="0"
+                    x:Name="subject"
+                    SelectedIndex="0"
+                    Title="Select Subject"    
+                    >
+                <Picker.ItemsSource>
+                    <x:Array Type="{x:Type x:String}">
+                        <x:String>Customer Service</x:String>
+                        <x:String>Complain From User</x:String>
+                        <x:String>Bug Report</x:String>
+                    </x:Array>
+                </Picker.ItemsSource>
+            </Picker>
+
+            <Editor Grid.Row="1" 
+                    TextChanged="Body_TextChanged"
+                    x:Name="body" />
+            <Button Grid.Row="2"
+                    Text="Submit" 
+                    BackgroundColor="Accent"
+                    TextColor="White"
+                    IsEnabled="False"
+                    Clicked="Submit_Clicked"
+                    x:Name="submit" />
+
+        </Grid>
+    </ContentPage.Content>
+</ContentPage>

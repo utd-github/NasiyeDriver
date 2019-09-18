@@ -58,7 +58,11 @@
                                     IconSource="Assets/emergency.png"
                                     TargetType="{x:Type localv:EmergencyContactsPage}" />
                                 <localm:MasterDetailListItem
-                                    Title="Help"
+                                    Title="Feedback"
+                                    IconSource="Assets/feedback.png"
+                                    TargetType="{x:Type localv:FeedBackPage}" />
+                                <localm:MasterDetailListItem
+                                    Title="About"
                                     IconSource="Assets/help.png"
                                     TargetType="{x:Type localv:HelpPage}" />
                             </x:Array>

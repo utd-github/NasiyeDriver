@@ -55,21 +55,7 @@
                                 BackgroundColor="Accent"
                             />
 
-                        <BoxView BackgroundColor="Gray"
-                                 Margin="10,10" 
-                                 HeightRequest="0.5" />
 
-                        <StackLayout
-                                     HorizontalOptions="CenterAndExpand">
-                            <Label Text="Don't have an account?" />
-                            <Button Text="Sign up"
-                                    Clicked="Signup_Clicked"
-                                    Margin="10,10" 
-                                    CornerRadius="5"
-                                    BackgroundColor="Transparent"
-                                    x:Name="signup"
-                                    TextColor="Black"/>
-                        </StackLayout>
                     </StackLayout>
                 </Frame>
             </StackLayout>

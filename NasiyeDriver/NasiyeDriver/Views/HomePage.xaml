@@ -4,6 +4,7 @@
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:maps="clr-namespace:Xamarin.Forms.Maps;assembly=Xamarin.Forms.Maps"
+             xmlns:local="clr-namespace:NasiyeDriver.CustomRenderers"
              mc:Ignorable="d"
              Title="Loading..."
              x:Name="container"
@@ -11,20 +12,28 @@
     
     <ContentPage.Content>
         <AbsoluteLayout>
-            <maps:Map 
+            <local:CustomMap
                   x:Name="mainmap"
-                  IsShowingUser="True"
+                  MapType="Street"
+                  IsShowingUser="False"
                   IsVisible="False"
                   AbsoluteLayout.LayoutBounds=".5,0,500,800"
                  />
             
-                <ActivityIndicator x:Name="maploading"
+            <ActivityIndicator x:Name="maploading"
                                    IsRunning="True"
                                    AbsoluteLayout.LayoutFlags="All"
                                    AbsoluteLayout.LayoutBounds=".5,.5,.25,.25"
                                    HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand" />
-           
-           
+
+            <ImageButton    AbsoluteLayout.LayoutBounds=".95,.800,.15,.10" 
+                            AbsoluteLayout.LayoutFlags="All"
+                            x:Name="geo"
+                            IsEnabled="False"
+                            Source="Assets/geo.png"
+                            BackgroundColor="Transparent"
+                            Clicked="Geo_Clicked"
+                            />
             <Frame AbsoluteLayout.LayoutBounds=".5,.999,.99,.15" 
                    AbsoluteLayout.LayoutFlags="All"
                    BackgroundColor="White" 
@@ -82,6 +91,89 @@
                     
                 </StackLayout>
             </Frame>
+
+            <StackLayout BackgroundColor="#50000000"  
+                         IsVisible="False"
+                         x:Name="reqpopup"
+                         AbsoluteLayout.LayoutBounds=".5,.500,20,20"
+                         AbsoluteLayout.LayoutFlags="All">
+                
+                <StackLayout HorizontalOptions="CenterAndExpand" 
+                             HeightRequest="400"
+                             WidthRequest="300"
+                      BackgroundColor="White" 
+                      VerticalOptions="CenterAndExpand">
+                  
+                    <StackLayout Grid.Row="0" 
+                         Padding="10" 
+                         Spacing="15">
+                        
+                        <Frame  CornerRadius="10" 
+                                HeightRequest="100"
+                                WidthRequest="100" 
+                                VerticalOptions="CenterAndExpand"
+                                HorizontalOptions="CenterAndExpand"
+                                BackgroundColor="AliceBlue"
+                                Padding="0">
+                            <Image x:Name="userImage"
+                                   Aspect="AspectFill"
+                                   Source="Assets/image.png"
+                                   Margin="0"/>
+                        </Frame>
+                        
+                        <Label Text="Customer Name" 
+                               HorizontalOptions="CenterAndExpand"/>
+                        
+                        <BoxView BackgroundColor="#70000000" 
+                                 HeightRequest="2" 
+                                 HorizontalOptions="CenterAndExpand"/>
+                        
+                        <Label  x:Name="username"
+                                Text="Full Name"
+                                FontAttributes="Bold"
+                                FontSize="25"
+                                VerticalOptions="CenterAndExpand"                    
+                                HorizontalOptions="CenterAndExpand" />
+                        
+                    </StackLayout>
+
+                    <BoxView BackgroundColor="#70000000" 
+                             HeightRequest="2" 
+                             HorizontalOptions="CenterAndExpand"/>
+
+                    <StackLayout Grid.Row="2" Padding="10">
+                        
+                            <Label  x:Name="timer"
+                            FontAttributes="Bold"
+                            TextColor="Red"
+                            FontSize="20"
+                            HorizontalOptions="CenterAndExpand"
+                            VerticalOptions="CenterAndExpand"
+                            Text="60 Secs"/>
+                        
+                    </StackLayout>
+
+                    <StackLayout Grid.Row="3" Spacing="10"
+                         Orientation="Horizontal" HorizontalOptions="FillAndExpand" VerticalOptions="EndAndExpand">
+                        <Button x:Name="accept" 
+                                Clicked="Accept_Clicked" 
+                                BackgroundColor="#64e291" 
+                                TextColor="White" Text="Accept"
+                                HorizontalOptions="FillAndExpand"
+                                VerticalOptions="EndAndExpand"/>
+
+                        <Button x:Name="cancel" 
+                        Clicked="Cancel_Clicked" 
+                        BackgroundColor="#ff502f" 
+                        TextColor="White" Text="Decline" 
+                        HorizontalOptions="FillAndExpand" 
+                        VerticalOptions="EndAndExpand" />
+                    </StackLayout>
+                </StackLayout>
+
+            </StackLayout>
+
+
         </AbsoluteLayout>
     </ContentPage.Content>
 </ContentPage>

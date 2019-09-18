@@ -21,7 +21,6 @@
                            Source="Assets/image.png"
                             Margin="0"
                             IsEnabled="False"/>
-
                 </Frame>
                
                 <Frame >
@@ -67,14 +66,6 @@
                             />
                     </Grid>
                 </Frame>
-                <StackLayout Margin="20">
-                    <Button x:Name="signout" 
-                            Clicked="Signout_Clicked" 
-                            Text="Sign out" BackgroundColor="Accent" 
-                            TextColor="White"/>
-                   
-
-                </StackLayout>
             </StackLayout>
 
         </ScrollView>

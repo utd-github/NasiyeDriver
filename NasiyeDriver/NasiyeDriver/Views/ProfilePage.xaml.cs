@@ -16,62 +16,74 @@ namespace NasiyeDriver.Views
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class ProfilePage : ContentPage
     {
+        public readonly IFirebaseAuthInterface _firebaseAuth;
+
+        public readonly IFirebaseDBInterface _firebaseDatabase;
+
         public ProfilePage()
         {
             InitializeComponent();
+            _firebaseDatabase = DependencyService.Get<IFirebaseDBInterface>();
+            _firebaseAuth = DependencyService.Get<IFirebaseAuthInterface>();
+
             GetProfile();
-            MessagingCenter.Subscribe<object, string>(this, "profile", (sender, data) =>
-            {
-                SetProfile(datatoModel(data));
-            });
+
         }
 
         private async void GetProfile()
         {
-            string auth = await DependencyService.Get<IFirebaseAuthInterface>().GetCurrentUser();
+            string uid = await _firebaseAuth.GetCurrentUser();
 
-            if (auth != null)
+            Action<Dictionary<string, UserModel>> onValueEvent = (Dictionary<string, UserModel> user) =>
             {
-                DependencyService.Get<IFirebaseDBInterface>().GetUserProfile(auth);
-            }
-        }
+                try
+                {
+                    System.Diagnostics.Debug.WriteLine("---> EVENT GetDataFromFirebase ");
 
+                    Action onSetValueSuccess = () =>
+                    {
+
+                    };
+
+                    Action<string> onSetValueError = (string errorDesc) =>
+                    {
+
+                    };
+
+                    if (user != null)
+                    {
+                        foreach (KeyValuePair<string, UserModel> item in user)
+                        {
+                           if(item.Key == uid)
+                            {
+                                SetProfile(item.Value);
+                            }
+                        }
+                    }
+                    else
+                    {
+
+                    }
+                }
+                catch (Exception ex)
+                {
+
+                    System.Diagnostics.Debug.WriteLine("---> error GetDataFromFirebase " + ex.Message);
+                    throw;
+                }
+            };
+
+            _firebaseDatabase.GetProfile("drivers", onValueEvent);
+        }
         private void SetProfile(UserModel User)
         {
             ename.Text = User.Name;
             ephone.Text = User.Phone;
             eemail.Text = User.Email;
 
-            userimage.Source = new UriImageSource
-            {
-                Uri = User.Image
-            };
-
-            
-
+            userimage.Source = ImageSource.FromUri(new Uri(User.Image));
         }
 
-
-        private UserModel datatoModel(string data)
-        {
-            UserModel user = null;
-
-            try
-            {
-                user = JsonConvert.DeserializeObject<UserModel>(data);
-
-                return user;
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        private void Signout_Clicked(object sender, EventArgs e)
-        {
-            DependencyService.Get<IFirebaseAuthInterface>().Singout();
-            App.Current.MainPage = new NavigationPage(new WelcomePage(true));
-        }
-}
+       
+     }
 }

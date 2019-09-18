@@ -15,16 +15,11 @@ namespace NasiyeDriver.Views
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class WelcomePage : ContentPage
     {
-        public WelcomePage(bool v)
+        public WelcomePage()
         {
 
             InitializeComponent();
             NavigationPage.SetHasNavigationBar(this, false);
-
-            if (!v)
-            {
-                DisplayAlert("Connectivity", "Sorry - something did not go through! Please check your network connection and try again", "OK");
-            }
 
         }
 
@@ -81,7 +76,7 @@ namespace NasiyeDriver.Views
                 
                 if (auth != null)
                 {
-                    await Navigation.PushAsync(new MainPage());
+                App.Current.MainPage = new MainPage();
                 }
                 else
                 {
