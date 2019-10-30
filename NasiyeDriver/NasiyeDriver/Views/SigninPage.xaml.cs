@@ -14,7 +14,6 @@ namespace NasiyeDriver.Views
         public SigninPage()
         {
             InitializeComponent();
-            NavigationPage.SetHasNavigationBar(this, false);
         }
 
 

@@ -23,15 +23,19 @@ namespace NasiyeDriver.Droid.Services
     class AFirebaseDBClass : IFirebaseDBInterface
     {
         Dictionary<string, DatabaseReference> DatabaseReferences;
-        FirebaseAuth mAuth = FirebaseAuth.GetInstance(MainActivity.app);
+
+        IValueEventListener tripListener;
 
 
         Dictionary<string, IValueEventListener> ValueEventListeners;
         Dictionary<string, IValueEventListener> DValueEventListeners;
         Dictionary<string, IValueEventListener> RValueEventListeners;
         Dictionary<string, IValueEventListener> TValueEventListeners;
+        Dictionary<string, IValueEventListener> STValueEventListeners;
         Dictionary<string, IValueEventListener> PValueEventListeners;
         Dictionary<string, IValueEventListener> CPValueEventListeners;
+
+        DatabaseReference tripdbref;
 
 
         public AFirebaseDBClass()
@@ -42,8 +46,14 @@ namespace NasiyeDriver.Droid.Services
             DValueEventListeners = new Dictionary<string, IValueEventListener>();
             RValueEventListeners = new Dictionary<string, IValueEventListener>();
             TValueEventListeners = new Dictionary<string, IValueEventListener>();
+            STValueEventListeners = new Dictionary<string, IValueEventListener>();
             PValueEventListeners = new Dictionary<string, IValueEventListener>();
             CPValueEventListeners = new Dictionary<string, IValueEventListener>();
+
+
+            tripListener = new TripValueEventListener();
+
+            tripdbref = FirebaseDatabase.Instance.GetReference("trips");
         }
 
         private DatabaseReference GetDatabaseReference(string nodeKey)
@@ -82,6 +92,7 @@ namespace NasiyeDriver.Droid.Services
             {
                 DValueEventListener<T> listener = new DValueEventListener<T>(action);
                 dr.OrderByChild("Status").EqualTo("Online").AddValueEventListener(listener);
+
                 if (DValueEventListeners != null)
                 {
                     DValueEventListeners.Remove(nodeKey);
@@ -153,7 +164,9 @@ namespace NasiyeDriver.Droid.Services
             if (dr != null)
             {
                 var driverref = dr.Child(uid);
-                _ = driverref.Child("Status").SetValue("Online").IsComplete;
+
+                driverref.Child("Status").SetValue("Online");
+                driverref.Child("Trip").SetValue("00");
             }
         }
 
@@ -178,9 +191,13 @@ namespace NasiyeDriver.Droid.Services
                 }
          }
 
+
+
+
         public void UpdateTripDriverLocation(string uid, object local)
         {
-            DatabaseReference dr = FirebaseDatabase.Instance.GetReference("drivers");
+            DatabaseReference dr = FirebaseDatabase.Instance.GetReference("trips");
+
             if (dr != null)
             {
                 string objJsonString = JsonConvert.SerializeObject(local);
@@ -216,41 +233,40 @@ namespace NasiyeDriver.Droid.Services
             }
         }
 
-        public void GetTrips<T>(string nodeKey, Action<T> action = null)
+        public void GetTrips(string tripkey)
         {
-            DatabaseReference dr = GetDatabaseReference(nodeKey);
-
-            if (dr != null)
+            if (tripdbref != null)
             {
-                TValueEventListener<T> listener = new TValueEventListener<T>(action);
-                dr.AddValueEventListener(listener);
-
-                if (TValueEventListeners != null)
-                {
-                    TValueEventListeners.Remove(nodeKey);
-                }
-                TValueEventListeners.Add(nodeKey, listener);
+                tripdbref.Child(tripkey).AddValueEventListener(tripListener);
             }
         }
 
-        public void GetSavedTrips<T>(string nodeKey, Action<T> OnValueEvent = null)
+
+        public void RemoveGetTrips(string tripkey)
         {
-            DatabaseReference dr = GetDatabaseReference(nodeKey);
+            if (tripdbref != null)
+            {
+                tripdbref.Child(tripkey).RemoveEventListener(tripListener);
+            }
+        }
+
+        public void GetSavedTrips(string uid)
+        {
+            DatabaseReference dr = FirebaseDatabase.Instance.GetReference("trips");
+
 
             if (dr != null)
             {
-                var user = mAuth.CurrentUser;
-
-                if (user != null)
-                {
-                    TValueEventListener<T> listener = new TValueEventListener<T>(OnValueEvent);
-
-                    dr.OrderByChild("Driver/Key").EqualTo(user.Uid).AddValueEventListener(listener);
-
-                    TValueEventListeners.Add(nodeKey, listener);
-                }
+                dr.OrderByChild("DriverKey").EqualTo(uid).AddValueEventListener(new SavedTripValueEventListener());
             }
         }
+
+
+
+
+
+
+
 
         public void AcceptrReq(string uid)
         {
@@ -297,7 +313,7 @@ namespace NasiyeDriver.Droid.Services
             DatabaseReference dr = FirebaseDatabase.Instance.GetReference("trips");
             if (dr != null)
             {
-                var duration = dr.Child(key);
+                var trip = dr.Child(key);
 
                 string objJsonString = JsonConvert.SerializeObject(v);
 
@@ -309,11 +325,44 @@ namespace NasiyeDriver.Droid.Services
 
                 dataHashMap = jsonObj.JavaCast<HashMap>();
 
-                duration.Child("Location").SetValue(dataHashMap);
+                trip.Child("Location").SetValue(dataHashMap);
             }
         }
 
-        public  void UpdatePausedTime(string key, string v)
+        public void UpdateDriverLocation(string key, object v)
+        {
+            DatabaseReference dr = FirebaseDatabase.Instance.GetReference("drivers");
+            if (dr != null)
+            {
+
+                string objJsonString = JsonConvert.SerializeObject(v);
+
+                Gson gson = new GsonBuilder().SetPrettyPrinting().Create();
+
+                HashMap dataHashMap = new HashMap();
+
+                Java.Lang.Object jsonObj = gson.FromJson(objJsonString, dataHashMap.Class);
+
+                dataHashMap = jsonObj.JavaCast<HashMap>();
+
+                dr.Child(key).Child("Location").SetValue(dataHashMap);
+            }
+        }
+
+        public void UpdateDriverTrips(string key, string v)
+        {
+            DatabaseReference dr = FirebaseDatabase.Instance.GetReference("drivers");
+            if (dr != null)
+            {
+                dr.Child(key).Child("Trips").SetValue(v);
+            }
+        }
+
+
+
+
+
+        public void UpdatePausedTime(string key, string v)
         {
             DatabaseReference dr = FirebaseDatabase.Instance.GetReference("trips");
             if (dr != null)
@@ -387,17 +436,17 @@ namespace NasiyeDriver.Droid.Services
                 GetOnline(useruid);
 
                 var trip = dr.Child(key);
-                var user = trip.Child("User");
                 var info = trip.Child("Info");
 
                 info.SetValue(comment);
-                user.Child("Rating").SetValue(rating);
+                trip.Child("Rating").Child("User").SetValue(rating);
             }
         }
 
         public async Task<string> StartTrip(string key, object trip)
         {
             DatabaseReference tripref = FirebaseDatabase.Instance.GetReference("trips");
+
             DatabaseReference driverref = FirebaseDatabase.Instance.GetReference("drivers");
 
             DatabaseReference reqref = FirebaseDatabase.Instance.GetReference("requests").Child(key);
@@ -406,7 +455,6 @@ namespace NasiyeDriver.Droid.Services
 
             var Key = tripref.Push().Key;
             // update request
-            reqref.Child("Key").SetValue(Key);
             // With key
             if(tripref != null)
             {
@@ -419,17 +467,30 @@ namespace NasiyeDriver.Droid.Services
                 Java.Lang.Object jsonObj = gson.FromJson(objJsonString, dataHashMap.Class);
 
                 dataHashMap = jsonObj.JavaCast<HashMap>();
+
                 tripref.Child(Key).SetValue(dataHashMap);
+
                 tripref.Child(Key).Child("Key").SetValue(Key);
 
+                reqref.Child("Key").SetValue(Key);
+
                 reqref.Child("Status").SetValue("Accepted");
-                driverref.Child(uid).Child("Trip").SetValue(uid);
+
+                driverref.Child(uid).Child("Trip").SetValue(Key);
 
                 return Key;
             }
             // start trip
             return null;
         }
+
+
+
+
+
+
+
+
 
         // Remove from listeners from dictionary
         
@@ -511,18 +572,108 @@ namespace NasiyeDriver.Droid.Services
 
                 if (dr != null)
                 {
-                    dr.RemoveEventListener(TValueEventListeners[nodeKey]);
-                    if (TValueEventListeners.ContainsKey(nodeKey))
+                    if (STValueEventListeners.ContainsKey(nodeKey))
                     {
-                        TValueEventListeners.Remove(nodeKey);
+                        dr.RemoveEventListener(STValueEventListeners[nodeKey]);
+
+                        STValueEventListeners.Remove(nodeKey);
 
                     }
                 }
             }
         }
 
+      
+        private class SavedTripValueEventListener : Java.Lang.Object, IValueEventListener
+        {
+            public void OnCancelled(DatabaseError error)
+            {
+               
+            }
+
+            public void OnDataChange(DataSnapshot snapshot)
+            {
+                if (snapshot.Exists())
+                {
+                    Gson gson = new GsonBuilder().Create();
+
+                    HashMap map = snapshot.Value.JavaCast<HashMap>();
+
+                    string tripdata = gson.ToJson(map);
+                    MessagingCenter.Send<object, string>(this, "savedtrips", tripdata);
+                }
+                else
+                {
+                    MessagingCenter.Send<object, string>(this, "savedtrips", null);
+                }
+            }
+        }
+
+        private class TripValueEventListener : Java.Lang.Object, IValueEventListener
+        {
+            public void OnCancelled(DatabaseError error)
+            {
+            }
+
+            public void OnDataChange(DataSnapshot snapshot)
+            {
+                if (snapshot.Exists())
+                {
+                    Gson gson = new GsonBuilder().Create();
+
+                    HashMap map = snapshot.Value.JavaCast<HashMap>();
+
+                    string tripdata = gson.ToJson(map);
+
+                    MessagingCenter.Send<object, string>(this, "tripin", tripdata);
+                }
+            }
+        }
     }
 
+    public class STValueEventListener<T> : Java.Lang.Object, IValueEventListener
+    {
+        public Action<T> action;
+
+        public STValueEventListener(Action<T> action)
+        {
+            this.action = action;
+        }
+
+        void IValueEventListener.OnCancelled(DatabaseError error)
+        {
+            //throw new NotImplementedException();
+        }
+
+        void IValueEventListener.OnDataChange(DataSnapshot snapshot)
+        {
+            if (snapshot.Exists() && snapshot.HasChildren)
+            {
+                HashMap dataHashMap = snapshot.Value.JavaCast<HashMap>();
+                Gson gson = new GsonBuilder().Create();
+                string data = gson.ToJson(dataHashMap);
+              // Try to deserialize :
+                try
+                {
+                    T chatItems = JsonConvert.DeserializeObject<T>(data);
+                    action(chatItems);
+                }
+                catch
+                {
+
+                }
+            }
+            else
+            {
+                T item = default(T);
+                action(item);
+            }
+        }
+
+
+
+    }
+    
     public class DValueEventListener<T> : Java.Lang.Object, IValueEventListener
     {
         public Action<T> action;

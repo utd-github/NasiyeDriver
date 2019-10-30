@@ -13,27 +13,38 @@ namespace NasiyeDriver.Droid.Services
 {
     class AFirebaseAuthClass : IFirebaseAuthInterface
     {
-        public static int SucessCode = 0;
 
-        public static int EmailNotFoundCode = 1;
-        public static int EmailExistsCode = 2;
-        public static int IncorrectPassword = 3;
-        public static int WeakPasswordCode = 4;
-        public static int ErrorUserDisAbled = 5;
+        FirebaseAuth mAuth;
 
-        public static int ErrorEmptyParams = 6;
+        public AFirebaseAuthClass()
+        {
+            var instance = FirebaseAuth.GetInstance(MainActivity.app);
+            if (instance == null)
+            {
+                mAuth = new FirebaseAuth(MainActivity.app);
+            }
+            else
+            {
+                mAuth = instance;
+            }
+        }
 
-        FirebaseAuth mAuth = FirebaseAuth.GetInstance(MainActivity.app);
-
-       
         public Task<string> GetCurrentUser()
         {
-            var user = mAuth.CurrentUser;
+            var instance = FirebaseAuth.GetInstance(MainActivity.app);
+            if (instance == null)
+            {
+                mAuth = new FirebaseAuth(MainActivity.app);
+            }
+            else
+            {
+                mAuth = instance;
+            }
 
-            if (user != null)
+            if (mAuth.CurrentUser != null)
             {
                 // User is signed in
-                return Task.FromResult(user.Uid.ToString());
+                return Task.FromResult(mAuth.CurrentUser.Uid.ToString());
             }
             else
             {
@@ -43,6 +54,16 @@ namespace NasiyeDriver.Droid.Services
 
         public async Task<string> LoginWithEmailPasswordAsync(string email, string password)
         {
+            var instance = FirebaseAuth.GetInstance(MainActivity.app);
+            if (instance == null)
+            {
+                mAuth = new FirebaseAuth(MainActivity.app);
+            }
+            else
+            {
+                mAuth = instance;
+            }
+
             IAuthResult res;
 
             try

@@ -39,7 +39,7 @@ namespace NasiyeDriver.Views
                     {
                         if (await CrossPermissions.Current.ShouldShowRequestPermissionRationaleAsync(Permission.Location))
                         {
-                            await DisplayAlert("Need location", "Gunna need that location", "OK");
+                            await DisplayAlert("Location", "We Need location permission first", "OK");
                         }
                         var results = await CrossPermissions.Current.RequestPermissionsAsync(Permission.Location);
                         status = results[Permission.Location];
@@ -54,13 +54,15 @@ namespace NasiyeDriver.Views
                     else if (status != PermissionStatus.Unknown)
                     {
                         //location denied
-                        await DisplayAlert("Need location", "Gunna need that location", "OK");
+                        await DisplayAlert("Location", "We Need location permission first", "OK");
+
+
                     }
                 }
                 catch (Exception ex)
                 {
                     //Something went wrong
-                    await DisplayAlert("Location err", "Error accured please ty again", "OK");
+                    await DisplayAlert("Location", "Something went wrong, please try again", "OK");
 
                 }
             }

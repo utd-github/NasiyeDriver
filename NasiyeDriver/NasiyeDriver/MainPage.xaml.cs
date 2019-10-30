@@ -25,8 +25,8 @@ namespace NasiyeDriver
         public static bool isreq = false;  
         public readonly IFirebaseDBInterface _firebaseDatabase;
         UserModel sUser = new UserModel();
-        bool IsFocused = false;
-        MasterDetailListItem CurrentItem;
+        bool mIsFocused = false;
+        Type CurrentItem;
         public MainPage()
         {
             
@@ -46,7 +46,11 @@ namespace NasiyeDriver
 
             _firebaseAuth = DependencyService.Get<IFirebaseAuthInterface>();
 
-            userimage.GestureRecognizers.Add(tapGestureRecognizer);
+            //userimage.GestureRecognizers.Add(tapGestureRecognizer);
+
+            CurrentItem = typeof(HomePage);
+
+
         }
 
         private async void ShowTripRequestPopUp(RequestModel req)
@@ -59,14 +63,19 @@ namespace NasiyeDriver
             {
                 if (req.Status == "Pending")
                 {
-                    CrossLocalNotifications.Current.Show("Hail", "You're being hailed");
-                    if (isreq)
+                    if (!isreq)
                     {
+                        isreq = true;
+
+
+                        CrossLocalNotifications.Current.Show("Taxi", "You're being requested");
+
                         MessagingCenter.Send<object, object>(this, "request", req);
                     }
                 }
                 else if (req.Status == "Accepted")
                 {
+                    VibrationCancel();
                     isreq = false;
                     if (isreq)
                     {
@@ -79,6 +88,22 @@ namespace NasiyeDriver
             
         }
 
+        private void VibrationCancel()
+        {
+            try
+            {
+                Vibration.Cancel();
+            }
+            catch (FeatureNotSupportedException ex)
+            {
+                // Feature not supported on device
+            }
+            catch (Exception ex)
+            {
+                // Other error has occurred.
+            }
+        }
+
         private void SetProfile(UserModel User)
         {
             MessagingCenter.Send<object, object>(this, "profile", User);
@@ -89,22 +114,69 @@ namespace NasiyeDriver
             IsGestureEnabled = true;
             userimage.Source = ImageSource.FromUri(new Uri(User.Image));
 
-            userrating.Text = User.Rating.ToString();
-            usertrips.Text = User.Status;
+            //userrating.Text = GetRating(User.Trips,User.Stars);
+            //usertrips.Text = User.Trips;
 
             if(User.Status == "Online")
             {
+                if (User.Trip != "00")
+                {
+                    App.Current.MainPage = new NavigationPage(new TripPage(User.Trip));
+                }
+               
                 if (!isreq)
                 {
                     isreq = true;
                     GetRequest(User.Key);
                 }
+                CrossLocalNotifications.Current.Show("Nasiye", "You're online now, waiting for requests");
+
+            }
+            if (User.Status == "Busy")
+            {
+                if(User.Trip != "00")
+                {
+                    App.Current.MainPage = new NavigationPage(new TripPage(User.Trip));
+                }
+                else
+                {
+                    _firebaseDatabase.GetOnline(User.Key);
+                }
             }
             else
             {
+                if (User.Trip != "00")
+                {
+                    App.Current.MainPage = new NavigationPage(new TripPage(User.Trip));
+                }
+
                 isreq = false;
-                _firebaseDatabase.RemoveGetRequests("requests");
             }
+
+            loader.IsVisible = false;
+            profilecon.IsVisible = true;
+        }
+
+        private string GetRating(string trips, string stars)
+        {
+            if(trips == "0")
+            {
+                return "Not Rated";
+            }
+
+
+            // Calculate Stars here
+
+
+
+
+            // return the result;
+
+
+
+
+
+            return "Not Rated";
         }
 
         private void GetRequest(string uid)
@@ -203,6 +275,7 @@ namespace NasiyeDriver
         private void MenuItemList_ItemSelected(object sender, SelectedItemChangedEventArgs e)
         {
             MasterDetailListItem item = e.SelectedItem as MasterDetailListItem;
+
             if (item != null)
             {
                 
@@ -210,18 +283,22 @@ namespace NasiyeDriver
 
                 IsPresented = false;
 
-               if(CurrentItem == null)
+               
+                if (CurrentItem != item.TargetType)
                 {
-                    CurrentItem = item;
-                }
-
-                if (CurrentItem != item)
-                {
-                    CurrentItem = item;
+                    CurrentItem = item.TargetType;
 
                     Detail = nav;
 
                     if (item.TargetType == typeof(HomePage))
+                    {
+                        MessagingCenter.Subscribe<object, object>(this, "get", (ssender, data) =>
+                        {
+                            MessagingCenter.Send<object, object>(this, "profile", sUser);
+                        });
+                    }
+
+                    if (item.TargetType == typeof(ProfilePage))
                     {
                         MessagingCenter.Send<object, object>(this, "profile", sUser);
                     }
@@ -240,18 +317,17 @@ namespace NasiyeDriver
         protected override void OnDisappearing()
         {
             base.OnDisappearing();
-            _firebaseDatabase.RemoveGetProfile("drivers");
         }
 
         protected override bool OnBackButtonPressed()
         {
-            if (IsFocused)
+            if (mIsFocused)
             {
                 return base.OnBackButtonPressed();
             }
             else
             {
-                IsFocused = true;
+                mIsFocused = true;
                 IsPresented = true;
                 return true;
             }

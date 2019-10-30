@@ -8,6 +8,8 @@ namespace NasiyeDriver.Models
     {
         // Trip Key
         public string Key { get; set; }
+        public string UserKey { get; set; }
+        public string DriverKey { get; set; }
 
         public User User { get; set; }
 
@@ -51,6 +53,9 @@ namespace NasiyeDriver.Models
         public string Phone { get; set; }
 
         public string Rating { get; set; }
+
+        public string Trips { get; set; }
+
 
         public Vehicle Vehicle { get; set; }
 

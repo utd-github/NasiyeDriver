@@ -1,0 +1,96 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:xforms="clr-namespace:Syncfusion.SfRating.XForms;assembly=Syncfusion.SfRating.XForms"
+             mc:Ignorable="d"
+             x:Class="NasiyeDriver.Views.ViewTrip">
+    <ContentPage.Content>
+        <Grid>
+            <Grid.RowDefinitions >
+                <RowDefinition Height="5*" />
+                <RowDefinition Height="15*" />
+                <RowDefinition Height="60*" />
+                <RowDefinition Height="20*" />
+            </Grid.RowDefinitions>
+            
+            <StackLayout Grid.Row="0" Orientation="Horizontal" >
+                <Label Text="Date: " x:Name="date"  FontSize="Large" HorizontalOptions="StartAndExpand" />
+                <Label Text="Trip ID: " x:Name="tripno"  FontSize="Large" HorizontalOptions="EndAndExpand" />
+            </StackLayout>
+            
+            <Grid Grid.Row="1" 
+                  x:Name="infobox"
+                  BackgroundColor="White">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="30*" />
+                    <ColumnDefinition Width="35*" />
+                    <ColumnDefinition Width="35*" />
+                </Grid.ColumnDefinitions>
+                <Image x:Name="userimage"
+                            Grid.Column="0"
+                            Source="Assets/image.png"
+                            HeightRequest="150"
+                            WidthRequest="150" 
+                            />
+                <StackLayout Grid.Column="1" Padding="0,5,0,0">
+                    <Label x:Name="username" FontSize="15" Text="User name" />
+                    <Label x:Name="userphone" FontSize="15" Text="User phone"/>
+                </StackLayout>
+                <StackLayout Grid.Column="2" >
+                   
+                </StackLayout>
+            </Grid>
+            <StackLayout Grid.Row="2">
+                <StackLayout Orientation="Horizontal" Grid.Row="1">
+                    <StackLayout HorizontalOptions="CenterAndExpand">
+                        <Label Text="Duration"/>
+                        <Label x:Name="duration" 
+                           Text="15 min" 
+                                                   FontSize="Medium"
+
+                           FontAttributes="Bold"/>
+                    </StackLayout>
+
+                    <StackLayout HorizontalOptions="CenterAndExpand">
+                        <Label Text="Price"/>
+                        <Label x:Name="price" 
+                           Text="$ 15.00" 
+                                                  FontSize="Medium"
+ 
+                           FontAttributes="Bold"/>
+                    </StackLayout>
+                    <StackLayout HorizontalOptions="CenterAndExpand">
+                        <Label Text="Distance"/>
+                        <Label x:Name="distance" 
+                           Text="15 min" 
+                                                   FontSize="Medium"
+
+                           FontAttributes="Bold"/>
+                    </StackLayout>
+                </StackLayout>
+
+                <StackLayout Grid.Row="2">
+                    <Label Text="How was the customer?" 
+                       HorizontalOptions="CenterAndExpand" 
+                       VerticalOptions="CenterAndExpand"/>
+                    <xforms:SfRating 
+                x:Name="rating"
+                ItemCount="5"
+                Precision="Standard" 
+                VerticalOptions="CenterAndExpand" 
+                HorizontalOptions="CenterAndExpand"
+                />
+                </StackLayout>
+            </StackLayout>
+
+            <StackLayout Grid.Row="3" IsVisible="False">
+                
+                
+                <Button Text="Report an Issue"  x:Name="report" BackgroundColor="SteelBlue" HorizontalOptions="FillAndExpand" VerticalOptions="EndAndExpand" TextColor="White"/>
+            </StackLayout>
+            
+        </Grid>
+    </ContentPage.Content>
+</ContentPage>

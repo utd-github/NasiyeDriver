@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -14,46 +14,69 @@ namespace NasiyeDriver.Views
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class FeedBackPage : ContentPage
     {
-        public readonly IFirebaseAuthInterface _firebaseAuth;
-        public readonly IFirebaseDBInterface _firebaseDatabase;
-
-
         public FeedBackPage()
         {
             InitializeComponent();
-            _firebaseDatabase = DependencyService.Get<IFirebaseDBInterface>();
-            _firebaseAuth = DependencyService.Get<IFirebaseAuthInterface>();
+            // Tap Gesture initialization
+            var phonetapped = new TapGestureRecognizer();
+            phonetapped.Tapped += Phonetapped_Tapped;
+            var emailtapped = new TapGestureRecognizer();
+            emailtapped.Tapped += Emailtapped_Tapped;
+            var websitetapped = new TapGestureRecognizer();
+            websitetapped.Tapped += Websitetapped_Tapped;
+            var maptapped = new TapGestureRecognizer();
+
+            // Add gestures to labels
+            phonetxt.GestureRecognizers.Add(phonetapped);
+            emailtxt.GestureRecognizers.Add(emailtapped);
+            websitetxt.GestureRecognizers.Add(websitetapped);
 
         }
 
-        private async void Submit_Clicked(object sender, EventArgs e)
+
+        // Info tapped
+        private void Emailtapped_Tapped(object sender, EventArgs e)
         {
-            // Message
-            FeedbackModel feedback = new FeedbackModel();
-
-            // Get input
-            feedback.Key = "00";
-            feedback.Subject = subject.SelectedItem.ToString();
-            feedback.Body = body.Text;
-            feedback.Date = DateTime.Today.Date.ToString();
-            feedback.From = "Driver";
-            feedback.Status = false;
-
-
-            _firebaseDatabase.SubmitFeedback(feedback);
-            await Navigation.PopAsync();
+            Device.OpenUri(new Uri("mailto:info@nasiyeservices.com"));
         }
 
-        private void Body_TextChanged(object sender, TextChangedEventArgs e)
+        private void Phonetapped_Tapped(object sender, EventArgs e)
         {
-            if(body.Text.Length > 10)
+            var number = "+252660000000";
+            try
             {
-                submit.IsEnabled = true;
+                PhoneDialer.Open(number);
             }
-            else
+            catch (ArgumentNullException anEx)
             {
-                submit.IsEnabled = false;
+                // Number was null or white space
+                Console.WriteLine("Error Argument Null Exception: ", anEx);
+            }
+            catch (FeatureNotSupportedException ex)
+            {
+                // Phone Dialer is not supported on this device..
+                Console.WriteLine("Error Feature Not Supported Exception: ", ex);
+            }
+            catch (Exception ex)
+            {
+                // Other error has occurred.
+                Console.WriteLine("Error Exception: ", ex);
             }
         }
+
+        private async void Websitetapped_Tapped(object sender, EventArgs e)
+        {
+            var uri = "http://www.nasiyeservices.com/";
+
+            await Browser.OpenAsync(uri, new BrowserLaunchOptions
+            {
+                LaunchMode = BrowserLaunchMode.SystemPreferred,
+                TitleMode = BrowserTitleMode.Show,
+                PreferredToolbarColor = Color.Aqua,
+                PreferredControlColor = Color.Violet
+            });
+        }
+
+
     }
 }

@@ -4,6 +4,8 @@
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:xforms="clr-namespace:Syncfusion.SfRating.XForms;assembly=Syncfusion.SfRating.XForms"
+             xmlns:ffimageloading="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
+             xmlns:fftransformations="clr-namespace:FFImageLoading.Transformations;assembly=FFImageLoading.Transformations"
              mc:Ignorable="d"
              Title="Rate Your Trip"
              x:Class="NasiyeDriver.Views.RatingPage">
@@ -27,17 +29,22 @@
                         BackgroundColor="AliceBlue"
                         Padding="0"
                                 >
-                    <Image x:Name="userImage"
-                           Aspect="AspectFill"
-                           Source="Assets/image.png"
-                           Margin="0"/>
+                    <ffimageloading:CachedImage 
+                                LoadingPlaceholder="Assets/image.png" 
+                                x:Name="userImage"  
+                                DownsampleToViewSize="true"
+                               HeightRequest="150" WidthRequest="150">
+                        <ffimageloading:CachedImage.Transformations>
+                            <fftransformations:CircleTransformation />
+                        </ffimageloading:CachedImage.Transformations>
+                    </ffimageloading:CachedImage>
                 </Frame>
                 <Label Text="Name" 
                        HorizontalOptions="CenterAndExpand"/>
                 <Label  x:Name="username"
                         Text="Full Name"
                         FontAttributes="Bold"
-                        FontSize="20"
+                        FontSize="Medium"
                         VerticalOptions="CenterAndExpand"                    
                         HorizontalOptions="CenterAndExpand" />
             </StackLayout>
@@ -47,7 +54,8 @@
                     <Label Text="Duration"/>
                     <Label x:Name="duration" 
                            Text="15 min" 
-                           FontSize="18" 
+                                                   FontSize="Medium"
+
                            FontAttributes="Bold"/>
                 </StackLayout>
 
@@ -55,14 +63,16 @@
                     <Label Text="Price"/>
                     <Label x:Name="price" 
                            Text="$ 15.00" 
-                           FontSize="18" 
+                                                  FontSize="Medium"
+ 
                            FontAttributes="Bold"/>
                 </StackLayout>
                 <StackLayout HorizontalOptions="CenterAndExpand">
                     <Label Text="Distance"/>
                     <Label x:Name="distance" 
                            Text="15 min" 
-                           FontSize="18" 
+                                                   FontSize="Medium"
+
                            FontAttributes="Bold"/>
                 </StackLayout>
             </StackLayout>
@@ -74,6 +84,7 @@
                 <xforms:SfRating 
                 x:Name="rating"
                 ItemCount="5"
+                ValueChanged="Rating_ValueChanged"
                 Precision="Standard" 
                 VerticalOptions="CenterAndExpand" 
                 HorizontalOptions="CenterAndExpand"
@@ -81,12 +92,14 @@
             </StackLayout>
 
             <StackLayout Grid.Row="3" Padding="10">
-                <Entry x:Name="body" 
-                           Placeholder="Additional Comments?" 
-                       VerticalOptions="FillAndExpand"/>
+                <!--<Entry x:Name="body" 
+                           Placeholder="Additional Comments?"--><!-- 
+                       VerticalOptions="FillAndExpand"/>-->
                 <Button x:Name="submit" 
                         Text="Submit"
+                        IsEnabled="False"
                         TextColor="White"
+                        VerticalOptions="EndAndExpand"
                         BackgroundColor="Accent"
                         Clicked="Submit_Clicked" />
             </StackLayout>

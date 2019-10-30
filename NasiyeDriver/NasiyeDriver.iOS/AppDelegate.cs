@@ -27,6 +27,8 @@ namespace NasiyeDriver.iOS
 
             LoadApplication(new App());
 
+            FFImageLoading.Forms.Platform.CachedImageRenderer.Init();
+
 
             if (UIDevice.CurrentDevice.CheckSystemVersion(10, 0))
             {

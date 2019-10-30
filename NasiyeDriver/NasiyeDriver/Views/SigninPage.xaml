@@ -5,6 +5,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:local1="clr-namespace:NasiyeDriver.Controllers"
              mc:Ignorable="d"
+             Title="Sign in"
              x:Class="NasiyeDriver.Views.SigninPage">
     <ContentPage.Content>
         <ScrollView Padding="0" Margin="0">
@@ -20,11 +21,13 @@
                 <Frame x:Name="container" 
                     HasShadow="False" 
                        Padding="20,10" 
+                       HorizontalOptions="FillAndExpand"
+                       VerticalOptions="StartAndExpand" 
                        CornerRadius="10"
                        BackgroundColor="White"
                        Margin="20,10">
                     <StackLayout Spacing="10" Padding="10">
-                        <Label Text="Welcome back!"
+                        <Label Text="Welcome!"
                                HorizontalOptions="Center"
                                FontAttributes="Bold"
                                FontSize="Large"

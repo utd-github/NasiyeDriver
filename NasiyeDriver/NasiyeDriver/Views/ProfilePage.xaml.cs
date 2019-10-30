@@ -20,70 +20,34 @@ namespace NasiyeDriver.Views
 
         public readonly IFirebaseDBInterface _firebaseDatabase;
 
+        UserModel UserModel;
         public ProfilePage()
         {
             InitializeComponent();
             _firebaseDatabase = DependencyService.Get<IFirebaseDBInterface>();
             _firebaseAuth = DependencyService.Get<IFirebaseAuthInterface>();
+           
 
-            GetProfile();
-
-        }
-
-        private async void GetProfile()
-        {
-            string uid = await _firebaseAuth.GetCurrentUser();
-
-            Action<Dictionary<string, UserModel>> onValueEvent = (Dictionary<string, UserModel> user) =>
+            MessagingCenter.Subscribe<object, object>(this, "profile", (sender, data) =>
             {
-                try
-                {
-                    System.Diagnostics.Debug.WriteLine("---> EVENT GetDataFromFirebase ");
-
-                    Action onSetValueSuccess = () =>
-                    {
-
-                    };
-
-                    Action<string> onSetValueError = (string errorDesc) =>
-                    {
-
-                    };
-
-                    if (user != null)
-                    {
-                        foreach (KeyValuePair<string, UserModel> item in user)
-                        {
-                           if(item.Key == uid)
-                            {
-                                SetProfile(item.Value);
-                            }
-                        }
-                    }
-                    else
-                    {
-
-                    }
-                }
-                catch (Exception ex)
-                {
-
-                    System.Diagnostics.Debug.WriteLine("---> error GetDataFromFirebase " + ex.Message);
-                    throw;
-                }
-            };
-
-            _firebaseDatabase.GetProfile("drivers", onValueEvent);
+                UserModel = data as UserModel;
+                SetProfile(UserModel);
+            });
         }
+
+       
         private void SetProfile(UserModel User)
         {
             ename.Text = User.Name;
             ephone.Text = User.Phone;
             eemail.Text = User.Email;
-
             userimage.Source = ImageSource.FromUri(new Uri(User.Image));
         }
 
-       
-     }
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+            MessagingCenter.Send<object, object>(this, "get", "profile");
+        }
+    }
 }

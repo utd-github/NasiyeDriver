@@ -4,41 +4,125 @@
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
-             Title="Feedback"
+             Title="Contact Us"
              x:Class="NasiyeDriver.Views.FeedBackPage">
     <ContentPage.Content>
-        <Grid Padding="10">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="10*" />
-                <RowDefinition  Height="82*" />
-                <RowDefinition Height="8*" />
-            </Grid.RowDefinitions>
-           
-            <Picker Grid.Row="0"
-                    x:Name="subject"
-                    SelectedIndex="0"
-                    Title="Select Subject"    
-                    >
-                <Picker.ItemsSource>
-                    <x:Array Type="{x:Type x:String}">
-                        <x:String>Customer Service</x:String>
-                        <x:String>Complain From User</x:String>
-                        <x:String>Bug Report</x:String>
-                    </x:Array>
-                </Picker.ItemsSource>
-            </Picker>
+        <ScrollView>
+            <StackLayout Padding="10">
+                <Label
+                    FontAttributes="Bold"
+                    FontSize="22"
+                    Text="For more information"
+                    TextColor="#009688" />
+                <Label FontSize="18" Text="Contact us on the following or visit us on the location below" />
+                <StackLayout
+                    Margin="10"
+                    Padding="0"
+                    HorizontalOptions="Start"
+                    Orientation="Vertical"
+                    VerticalOptions="Start">
+                    <StackLayout
+                        Padding="0"
+                        HorizontalOptions="Start"
+                        Orientation="Horizontal"
+                        VerticalOptions="Start">
+                        <Frame
+                            Margin="0"
+                            Padding="0"
+                            BackgroundColor="#EAF2F8"
+                            BorderColor="#FFFFFF"
+                            CornerRadius="50"
+                            HasShadow="True"
+                            HorizontalOptions="Start"
+                            VerticalOptions="Center">
+                            <StackLayout Padding="5">
+                                <Image
+                                    Aspect="Fill"
+                                    HeightRequest="30"
+                                    HorizontalOptions="Center"
+                                    Source="Assets/phone.png"
+                                    VerticalOptions="Center"
+                                    WidthRequest="30" />
+                            </StackLayout>
+                        </Frame>
+                        <Label
+                            x:Name="phonetxt"
+                            FontSize="21"
+                            HorizontalTextAlignment="Center"
+                            Text="+252 66 0 000000"
+                            TextColor="#19339B"
+                            TextDecorations="Underline"
+                            VerticalTextAlignment="Center" />
+                    </StackLayout>
+                    <StackLayout
+                        Padding="0"
+                        HorizontalOptions="Start"
+                        Orientation="Horizontal"
+                        VerticalOptions="Start">
+                        <Frame
+                            Margin="0"
+                            Padding="0"
+                            BackgroundColor="#EAF2F8"
+                            BorderColor="#FFFFFF"
+                            CornerRadius="50"
+                            HasShadow="True"
+                            HorizontalOptions="Start"
+                            VerticalOptions="Center">
+                            <StackLayout Padding="5">
+                                <Image
+                                    Aspect="Fill"
+                                    HeightRequest="30"
+                                    HorizontalOptions="Center"
+                                    Source="Assets/email.png"
+                                    VerticalOptions="Center"
+                                    WidthRequest="30" />
+                            </StackLayout>
+                        </Frame>
+                        <Label
+                            x:Name="emailtxt"
+                            FontSize="21"
+                            HorizontalTextAlignment="Center"
+                            Text="info@nasiyeservices.com"
+                            TextColor="#19339B"
+                            TextDecorations="Underline"
+                            VerticalTextAlignment="Center" />
+                    </StackLayout>
+                    <StackLayout
+                        Padding="0"
+                        HorizontalOptions="Start"
+                        Orientation="Horizontal"
+                        VerticalOptions="Start">
+                        <Frame
+                            Margin="0"
+                            Padding="0"
+                            BackgroundColor="#EAF2F8"
+                            BorderColor="#FFFFFF"
+                            CornerRadius="50"
+                            HasShadow="True"
+                            HorizontalOptions="Start"
+                            VerticalOptions="Center">
+                            <StackLayout Padding="5">
+                                <Image
+                                    Aspect="Fill"
+                                    HeightRequest="30"
+                                    HorizontalOptions="Center"
+                                    Source="Assets/help.png"
+                                    VerticalOptions="Center"
+                                    WidthRequest="30" />
+                            </StackLayout>
+                        </Frame>
+                        <Label
+                            x:Name="websitetxt"
+                            FontSize="21"
+                            HorizontalTextAlignment="Center"
+                            Text="http://www.nasiyeservices.com"
+                            TextColor="#19339B"
+                            TextDecorations="Underline"
+                            VerticalTextAlignment="Center" />
+                    </StackLayout>
+                </StackLayout>
 
-            <Editor Grid.Row="1" 
-                    TextChanged="Body_TextChanged"
-                    x:Name="body" />
-            <Button Grid.Row="2"
-                    Text="Submit" 
-                    BackgroundColor="Accent"
-                    TextColor="White"
-                    IsEnabled="False"
-                    Clicked="Submit_Clicked"
-                    x:Name="submit" />
-
-        </Grid>
+            </StackLayout>
+        </ScrollView>
     </ContentPage.Content>
 </ContentPage>

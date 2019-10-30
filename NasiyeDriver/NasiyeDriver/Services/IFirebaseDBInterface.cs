@@ -15,12 +15,14 @@ namespace NasiyeDriver.Services
 
         void GetProfile<T>(string nodeKey, Action<T> OnValueEvent = null);
         void GetCheckProfile<T>(string nodeKey, Action<T> OnValueEvent = null);
+        void UpdateDriverLocation(string nodeKey, object v);
+        void UpdateDriverTrips(string nodeKey, string v);
 
         void GetDrivers<T>(string nodeKey, Action<T> OnValueEvent = null);
         void GetRequests<T>(string nodeKey, Action<T> OnValueEvent = null);
         void GetOnline(string uid);
         void GetOffline(string user);
-        void GetSavedTrips<T>(string nodeKey, Action<T> OnValueEvent = null);
+        void GetSavedTrips(string uid);
 
         //
 
@@ -29,6 +31,7 @@ namespace NasiyeDriver.Services
         void RemoveGetCheckProfile(string nodeKey);
         void RemoveGetDrivers(string nodeKey);
         void RemoveGetSavedTrips(string nodeKey);
+        void RemoveGetTrips(string tripkey);
 
         //
 
@@ -44,7 +47,18 @@ namespace NasiyeDriver.Services
 
         Task<string> StartTrip(string key, object trip);
         void GetBusy(string user);
-        void GetTrips<T>(string nodeKey, Action<T> OnValueEvent = null);
+
+
+
+
+
+        void GetTrips(string tripkey);
+
+
+
+
+
+
         void SubmitFeedback(object feedback);
     }
 }

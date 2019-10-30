@@ -45,11 +45,11 @@ namespace NasiyeDriver.Views
 
             username.Text = user.Name;
             price.Text = "$ "  +tripModel.Amount;
-            duration.Text = tripModel.Duration;
-            distance.Text = tripModel.Distance;
+            duration.Text = tripModel.Duration + " Mins";
+            distance.Text = tripModel.Distance+ " KM";
         }
 
-        private async void Submit_Clicked(object sender, EventArgs e)
+        private void Submit_Clicked(object sender, EventArgs e)
         {
             // Submit Comment and stars
             // Get Rating
@@ -57,12 +57,32 @@ namespace NasiyeDriver.Views
             submit.IsEnabled = false;
             double rated = rating.Value;
 
-            string comment = body.Text;
+            //string comment = body.Text;
+            int trips = 0;
+            if(Trip.Driver.Trips != null)
+            {
+                trips = int.Parse(Trip.Driver.Trips) + 1;
+            }
+            else
+            {
+                trips = 1;
+            }
 
-            _firebaseDatabase.SubmitTripRating(Trip.Key, rated, comment);
+            _firebaseDatabase.UpdateDriverTrips(Trip.Driver.Key, trips.ToString());
 
+
+
+
+            _firebaseDatabase.SubmitTripRating(Trip.Key, rated, "");
+            _firebaseDatabase.GetOnline(Trip.Driver.Key);
+            
             App.Current.MainPage = new MainPage();
 
+        }
+
+        private void Rating_ValueChanged(object sender, Syncfusion.SfRating.XForms.ValueEventArgs e)
+        {
+            submit.IsEnabled = true;
         }
     }
 }

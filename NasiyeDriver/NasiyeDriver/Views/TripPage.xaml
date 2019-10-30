@@ -38,7 +38,6 @@
                     <xforms:SfRating 
                                 x:Name="userrating"
                                 ItemCount="5"
-                                Value="3"
                                 IsEnabled="False"
                                 ItemSize="10"
                                 Precision="Standard" 
@@ -110,6 +109,7 @@
                                    AbsoluteLayout.LayoutBounds=".5,.5,.25,.25"
                                    HorizontalOptions="CenterAndExpand"                              
                                    VerticalOptions="CenterAndExpand" />
+            
             <Frame AbsoluteLayout.LayoutBounds=".5,.999,.99,.27" 
                    AbsoluteLayout.LayoutFlags="All"
                    BackgroundColor="White" 
@@ -132,7 +132,7 @@
                                        HeightRequest="50"
                                        WidthRequest="50" 
                                        HorizontalOptions="CenterAndExpand"/>
-                            <Label x:Name="distance" Text="00 KM" HorizontalOptions="CenterAndExpand"/>
+                            <Label x:Name="distance" Text="00 KM" FontSize="Medium" FontAttributes="Bold" HorizontalOptions="CenterAndExpand"/>
                         </StackLayout>
 
                         <StackLayout HorizontalOptions="CenterAndExpand">
@@ -140,7 +140,7 @@
                                        HeightRequest="50"
                                        WidthRequest="50" 
                                        HorizontalOptions="CenterAndExpand"/>
-                            <Label x:Name="duration" Text="00 Secs" HorizontalOptions="CenterAndExpand"/>
+                            <Label x:Name="duration" Text="00 Min" FontSize="Medium" FontAttributes="Bold" HorizontalOptions="CenterAndExpand"/>
                         </StackLayout>
 
                         <StackLayout HorizontalOptions="CenterAndExpand">
@@ -148,7 +148,7 @@
                                        HeightRequest="50"
                                        WidthRequest="50" 
                                        HorizontalOptions="CenterAndExpand"/>
-                            <Label Text="0.0 $" x:Name="amount" HorizontalOptions="CenterAndExpand"/>
+                            <Label Text="0.0 $" x:Name="amount" FontSize="Medium" FontAttributes="Bold" HorizontalOptions="CenterAndExpand"/>
                         </StackLayout>
                     </StackLayout>
                     <StackLayout x:Name="wcon"

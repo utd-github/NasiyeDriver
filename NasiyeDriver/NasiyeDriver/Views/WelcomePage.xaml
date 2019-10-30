@@ -20,12 +20,7 @@
                     <Image Source="Assets/logoh.png" 
                        HorizontalOptions="CenterAndExpand"
                        VerticalOptions="CenterAndExpand"/>
-                    <Label  Text="Let's get you started!"
-                            TextColor="Black"
-                        HorizontalOptions="CenterAndExpand"
-                        FontAttributes="Bold"
-                        VerticalOptions="Center"
-                        FontSize="Large" />
+                  
                 </StackLayout>
                 <BoxView BackgroundColor="#f6f078" HorizontalOptions="FillAndExpand" VerticalOptions="End" HeightRequest="1"/>
             </StackLayout>

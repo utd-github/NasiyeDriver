@@ -24,6 +24,12 @@ namespace NasiyeDriver.Models
 
         public Vehicle Vehicle { get; set; }
 
+        public string Trips { get; set; }
+        public string Stars { get; set; }
+
+
+
+
         public string Status { get; set; }
 
         public string Trip { get; set; }

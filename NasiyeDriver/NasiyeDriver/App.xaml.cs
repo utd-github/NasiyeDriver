@@ -13,7 +13,7 @@ namespace NasiyeDriver
 
         public App()
         {
-            Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("MTI1OTgzQDMxMzcyZTMyMmUzMFhldFRrMmk3SWdoY3g2bEFBd29yNWJRNlRib3RWK3lITWszbW1tRlozdW89");
+            Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("MTYzNTA1QDMxMzcyZTMzMmUzMFVTWi9OZ0V6Tkpka2k4VHJzMnQ3V0JKa216UkpENGVLZlZReGhyUEZaL0k9");
 
             InitializeComponent();
 
@@ -49,32 +49,20 @@ namespace NasiyeDriver
             // Handle when your app starts
         }
 
-        protected async override void OnSleep()
+        protected override void OnSleep()
         {
-            NetworkAccess current = Connectivity.NetworkAccess;
-
             // Handle when your app sleeps
-            if (current == NetworkAccess.Internet)
-            {
-
-                var auth = await DependencyService.Get<IFirebaseAuthInterface>().GetCurrentUser();
-
-                if (auth != null)
-                {
-                    _firebaseDatabase.CancelRequest(auth);
-                    _firebaseDatabase.GetOffline(auth);
-                }
-                else
-                {
-                   
-                }
-
-            }
+           
         }
 
         protected override void OnResume()
         {
             // Handle when your app resumes
+
+
+
+
+
         }
     }
 }

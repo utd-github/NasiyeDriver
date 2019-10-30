@@ -1,6 +1,7 @@
 ﻿using NasiyeDriver.CustomRenderers;
 using NasiyeDriver.Models;
 using NasiyeDriver.Services;
+using Newtonsoft.Json;
 using Plugin.Geolocator;
 using Plugin.Geolocator.Abstractions;
 using Plugin.Permissions;
@@ -11,6 +12,9 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Twilio.Clients;
+using Twilio.Rest.Api.V2010.Account;
+using Twilio.Types;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xamarin.Forms.Maps;
@@ -24,10 +28,19 @@ namespace NasiyeDriver.Views
 
         public readonly IFirebaseAuthInterface _firebaseAuth;
         public readonly IFirebaseDBInterface _firebaseDatabase;
+        string tripkey;
         TripModel Trip;
-        Stopwatch stopwatch = new Stopwatch(), pstopwatch = new Stopwatch();
+        Stopwatch stopwatch, pstopwatch;
+        bool sent = false;
+        Plugin.Geolocator.Abstractions.Position Cposition;
 
-        Plugin.Geolocator.Abstractions.Position CPosition;
+        string cdata = null;
+
+        bool sisrunning = false, pisrunning = false;
+
+        string accountSid = "AC034b0fca9b66ae9d444b75c94cdd55f9";
+        string authToken = "9eb2133530d8447ee1f74eb383332b3e";
+       
 
         public TripPage(string key)
         {
@@ -39,15 +52,21 @@ namespace NasiyeDriver.Views
 
             Trip = new TripModel();
 
-            GetTrip(key);
+            tripkey = key;
+
+            stopwatch = new Stopwatch();
+            pstopwatch = new Stopwatch();
+
+            GetTrip();
 
         }
 
 
         private void ShowMap(User user, Driver driver)
         {
+            mainmap.Pins.Clear();
 
-            mainmap.MoveToRegion(MapSpan.FromCenterAndRadius(new Xamarin.Forms.Maps.Position(driver.Location.Lat, driver.Location.Lat), Distance.FromMiles(1)).WithZoom(2));
+            mainmap.MoveToRegion(MapSpan.FromCenterAndRadius(new Xamarin.Forms.Maps.Position(driver.Location.Lat, driver.Location.Lng), Distance.FromMiles(1)).WithZoom(2));
 
             var pin = new CustomPin
             {
@@ -58,18 +77,24 @@ namespace NasiyeDriver.Views
                 Icon = "driver"
             };
 
-            var upin = new CustomPin
-            {
-                Position = new Xamarin.Forms.Maps.Position(user.Location.Lat, user.Location.Lng),
-                Label = "Xamarin San Francisco Office",
-                Address = "394 Pacific Ave, San Francisco CA",
-                MarkerId = "Xamarin",
-                Icon = "user"
-            };
-
             mainmap.CustomPins = new List<CustomPin> { pin };
 
-            mainmap.Pins.Add(upin);
+
+            if (Trip.Status != "Started")
+            {
+                var upin = new CustomPin
+                {
+                    Position = new Xamarin.Forms.Maps.Position(user.Location.Lat, user.Location.Lng),
+                    Label = "Xamarin San Francisco Office",
+                    Address = "394 Pacific Ave, San Francisco CA",
+                    MarkerId = "Xamarin",
+                    Icon = "user"
+                };
+                mainmap.Pins.Add(upin);
+
+            }
+
+
 
             mainmap.Pins.Add(pin);
 
@@ -78,78 +103,79 @@ namespace NasiyeDriver.Views
             mainmap.IsVisible = true;
         }
 
-        private void GetTrip(string key)
+        private void GetTrip()
         {
-            Action<Dictionary<string, TripModel>> onValueEvent = (Dictionary<string, TripModel> trips) =>
+            _firebaseDatabase.GetTrips(tripkey);
+            DeviceDisplay.KeepScreenOn = true;
+
+            MessagingCenter.Subscribe<object, string>(this, "tripin", (sender, data) =>
+             {
+                 if(data != cdata)
+                 {
+                     cdata = data;
+
+                     Trip = ToTripMOdel(data);
+
+                     if (Trip != null)
+                     {
+                         ShowTripProgress(Trip);
+                     }
+                     else
+                     {
+                         _firebaseDatabase.GetTrips(tripkey);
+                     }
+
+                 }
+             });
+        }
+
+        private TripModel ToTripMOdel(string data)
+        {
+            if (data != "")
             {
                 try
                 {
-                    System.Diagnostics.Debug.WriteLine("---> EVENT GetDataFromFirebase ");
+                    TripModel trip = JsonConvert.DeserializeObject<TripModel>(data);
 
-                    Action onSetValueSuccess = () =>
-                    {
-
-                    };
-
-                    Action<string> onSetValueError = (string errorDesc) =>
-                    {
-
-                    };
-
-                    if (trips != null)
-                    {
-                        foreach (KeyValuePair<string, TripModel> item in trips)
-                        {
-                            if (item.Key == key)
-                            {
-                                ShowTripProgress(item.Value);
-                            }
-                        }
-                    }
-                    else
-                    {
-
-                    }
+                    return trip;
                 }
-                catch (Exception ex)
+                catch
                 {
-
-                    System.Diagnostics.Debug.WriteLine("---> error GetDataFromFirebase " + ex.Message);
-                    throw;
+                    return null;
                 }
-            };
+            }
 
-            _firebaseDatabase.GetTrips("trips", onValueEvent);
+            return null;
+            
         }
 
         private async void Canceltrip_Clicked(object sender, EventArgs e)
         {
             // Cancel trip
-            string auth = await DependencyService.Get<IFirebaseAuthInterface>().GetCurrentUser();
 
-            if (auth != null)
+            if (await DisplayAlert("Trip", "Do you want Cancel trip?", "YES", "NO"))
             {
-                DependencyService.Get<IFirebaseDBInterface>().UpdateTripInfo(auth, "Canceled");
+
+                if (tripkey != null)
+                {
+                    DependencyService.Get<IFirebaseDBInterface>().UpdateTripInfo(tripkey, "Canceled");
+                }
             }
+
             // POP Navigation
-            await Navigation.PopAsync();
         }
 
         private void GetCurrentLocation()
         {
             if (Trip.Key != null)
             {
-                // Get Location
-                Models.Location location = new Models.Location();
+                    if (Trip.Driver.Location != null)
+                    {
+                        _firebaseDatabase.UpdateTripLocation(Trip.Key, Trip.Driver.Location);
 
-                location.Lat = CPosition.Latitude;
-                location.Lng = CPosition.Longitude;
-
-                _firebaseDatabase.UpdateTripLocation(Trip.Key, location);
-
+                    }
             }
         }
-
 
         private void Calluser_Clicked(object sender, EventArgs e)
         {
@@ -180,31 +206,47 @@ namespace NasiyeDriver.Views
         {
             if (Trip.Key != null)
             {
+                GetTrip();
+
                 DependencyService.Get<IFirebaseDBInterface>().UpdateTripInfo(Trip.Key, "Wait");
             }
         }
 
         private void Arived_Clicked(object sender, EventArgs e)
         {
-            if (Trip.Key != null)
+            if (tripkey != null)
             {
-                _firebaseDatabase.UpdateTripInfo(Trip.Key, "Arrived");
+                _firebaseDatabase.UpdateTripInfo(tripkey, "Arrived");
             }
         }
 
         private async void Startstrip_Clicked(object sender, EventArgs e)
         {
-            if (Trip.Key != null)
+            if (tripkey != null)
             {
+                GetTrip();
+
                 if (await DisplayAlert("Trip", "Are your sure you want to Start the trip?", "YES", "NO"))
                 {
 
                     GetCurrentLocation();
                     // 
                     //
-                    _firebaseDatabase.UpdateTripInfo(Trip.Key, "Started");
+                    if (!sisrunning)
+                    {
+                        sisrunning = true;
+                        DistanceUpdate(true);
+                        UpdateDuration();
+                    }
 
-                    DistanceUpdate(true);
+                    if (pisrunning)
+                    {
+                        pisrunning = false;
+                        UpdatePausedTime(false);
+                    }
+
+                    _firebaseDatabase.UpdateTripInfo(tripkey, "Started");
+
 
                 }
             }
@@ -212,23 +254,44 @@ namespace NasiyeDriver.Views
 
         private async void Pausetrip_Clicked(object sender, EventArgs e)
         {
-            if (Trip.Key != null)
+            if (tripkey != null)
             {
+                GetTrip();
+
                 if (await DisplayAlert("Trip", "Are your sure you want to Pause the trip?", "YES", "NO"))
                 {
-                    _firebaseDatabase.UpdateTripInfo(Trip.Key, "Paused");
+
+                    if (sisrunning)
+                    {
+                        sisrunning = false;
+                        UpdateDuration(false);
+                        DistanceUpdate();
+                    }
+
+                    if (!pisrunning)
+                    {
+                        pisrunning = true;
+                        UpdatePausedTime();
+                    }
+
+                    
+
+                    _firebaseDatabase.UpdateTripInfo(tripkey, "Paused");
                 }
             }
         }
 
         private async void Endtrip_Clicked(object sender, EventArgs e)
         {
-            if (Trip.Key != null)
+            if (tripkey != null)
             {
+                GetTrip();
 
-                if(await DisplayAlert("Trip", "Are your sure you want to End the trip?","YES", "NO"))
+                if (await DisplayAlert("Trip", "Are your sure you want to End the trip?","YES", "NO"))
                 {
-                    DependencyService.Get<IFirebaseDBInterface>().UpdateTripInfo(Trip.Key, "End");
+
+                    DependencyService.Get<IFirebaseDBInterface>().UpdateTripInfo(tripkey, "End");
+                    StartTrackingAsync(false);
                     // Navigate to rating page
 
                 }
@@ -236,10 +299,7 @@ namespace NasiyeDriver.Views
             }
         }
 
-
-
-
-        private void ShowTripProgress(TripModel tripModel)
+        private async void ShowTripProgress(TripModel tripModel)
         {
 
             Trip = tripModel;
@@ -256,7 +316,7 @@ namespace NasiyeDriver.Views
                 iconsbox.IsVisible = true;
                 wcon.IsVisible = true;
                 loader.IsVisible = false;
-                status.Text = "On the Way";
+                status.Text = "Accepted";
 
                 ShowTripInfo(tripModel);
 
@@ -266,19 +326,18 @@ namespace NasiyeDriver.Views
                 // SHow arrived
                 ontheway.IsVisible = false;
                 arived.IsVisible = true;
-                status.Text = "Waiting";
+                status.Text = "User waiting";
 
             }
             else if (tripModel.Status == "Arrived")
             {
                 arived.IsVisible = false;
                 start.IsVisible = true;
-                status.Text = "Waiting for Customer";
+                status.Text = "Waiting for User";
 
             }
             else if (tripModel.Status == "Started")
             {
-
                 status.Text = "Trip On Going";
 
                 if (stopwatch.IsRunning)
@@ -289,7 +348,9 @@ namespace NasiyeDriver.Views
                 {
                     stopwatch.Start();
                 }
+
                 // hide all
+
                 wcon.IsVisible = false;
                 // Show trip
                 trpinfocon.IsVisible = true;
@@ -300,15 +361,22 @@ namespace NasiyeDriver.Views
 
                 StartTripInfo(tripModel);
 
-                UpdatePausedTime(false);
+                if (!sisrunning)
+                {
+                    sisrunning = true;
+                    DistanceUpdate(true);
+                    UpdateDuration();
+                }
+
+                if (pisrunning)
+                {
+                    pisrunning = false;
+                    UpdatePausedTime(false);
+                }
 
                 pausetrip.IsVisible = true;
 
                 rstart.IsVisible = false;
-
-                UpdateDuration();
-
-                UpdateAmount(true);
 
             }
             else if (tripModel.Status == "Paused")
@@ -324,7 +392,19 @@ namespace NasiyeDriver.Views
 
                 status.Text = "Trip Paused";
 
-                UpdateDuration(false);
+                if (sisrunning)
+                {
+                    sisrunning = false;
+                    UpdateDuration(false);
+                    DistanceUpdate();
+                }
+
+                if (!pisrunning)
+                {
+                    pisrunning = true;
+                    UpdatePausedTime();
+                }
+
 
                 rstart.IsVisible = true;
 
@@ -332,42 +412,103 @@ namespace NasiyeDriver.Views
 
                 stopwatch.Stop();
 
-                UpdatePausedTime();
             }
             else if (tripModel.Status == "End")
             {
+                DeviceDisplay.KeepScreenOn = true;
+
                 // Stop Trip Updates
                 UpdateDuration(false);
+                UpdatePausedTime(false);
 
-                App.Current.MainPage = new RatingPage(tripModel);
+                GetAmountUpdate(tripModel);
+
+                await StartTrackingAsync(false);
+
+                MessagingCenter.Unsubscribe<object, string>(this, "tripin");
+
+                _firebaseDatabase.RemoveGetTrips(Trip.Key);
+
+                App.Current.MainPage = new NavigationPage(new RatingPage(tripModel));
+            }
+            else if (tripModel.Status == "Canceled")
+            {
+                // Stop Trip Updates
+                UpdateDuration(false);
+                UpdatePausedTime(false);
+                DistanceUpdate();
+
+                string uid = await _firebaseAuth.GetCurrentUser();
+
+                StartTrackingAsync(false);
+
+                MessagingCenter.Unsubscribe<object, string>(this, "tripin");
+
+                await DisplayAlert("Trip", "Trip Canceled", "OK");
+
+                _firebaseDatabase.GetOnline(uid);
+                _firebaseDatabase.RemoveGetTrips(Trip.Key);
+
+
+                App.Current.MainPage = new MainPage();
             }
         }
 
-     
+        private void GetAmountUpdate(TripModel tripModel)
+        {
+            // Calculate Amount
+            var client = new TwilioRestClient(accountSid, authToken);
+
+            if (double.Parse(tripModel.Distance ) > 3.0)
+            {
+                // Get Paused time
+                int ptime = int.Parse(tripModel.PauseTime);
+
+                double km = float.Parse(tripModel.Distance) - 3.0;
+
+                double amount = float.Parse(tripModel.Amount);
+
+                double time = ptime * 0.05;
+
+
+                double dp = km * 0.5;
+
+                double total = Math.Round(dp + time + amount, 2);
+                // 
+                string body = "Thank you for using Nasiye Taxi Service, The Total Distance is " + Trip.Distance + " KM, and your total is : $" + total + ".";
+
+                //
+                if (!sent)
+                {
+                    sent = true;
+                    var message = MessageResource.Create(
+                              to: new PhoneNumber(Trip.User.Phone),
+                              from: "Nasiye",
+                              body: body,
+                              client: client);
+                } 
+              
+
+                _firebaseDatabase.UpdateTripAmount(tripModel.Key, total.ToString());
+            }
+            else
+            {
+                string body = "Thank you for using Nasiye Taxi Service, The Total Distance is " + Trip.Distance + " KM, and your total is : $" + Trip.Amount + ".";
+                var message = MessageResource.Create(
+                               to: new PhoneNumber(Trip.User.Phone),
+                               from: "Nasiye",
+                               body: body,
+                               client: client);
+            }
+           
+        }
+
         private void StartTripInfo(TripModel tripModel)
         {
-            // Start Counting
-            StartTiming(tripModel);
-            // Start distance calculation
-            StartDistance(tripModel);
-            //Start calculating amount
-            StartAmount(tripModel);
-
-        }
-
-        private void StartAmount(TripModel tripModel)
-        {
             amount.Text = "$ " + double.Parse(tripModel.Amount);
-        }
-
-        private void StartDistance(TripModel tripModel)
-        {
             distance.Text = double.Parse(tripModel.Distance) + " KM";
-        }
+            duration.Text = double.Parse(tripModel.Duration) + " MIN";
 
-        private void StartTiming(TripModel tripModel)
-        {
-            duration.Text = double.Parse(tripModel.Duration) + " min";
         }
 
         private async void ShowTripInfo(TripModel tripmodel)
@@ -388,8 +529,6 @@ namespace NasiyeDriver.Views
             //// STart tracking
             await StartTrackingAsync(true);
         }
-
-
 
 
 
@@ -475,11 +614,11 @@ namespace NasiyeDriver.Views
             {
                 Models.Location local = new Models.Location();
 
-                var position = e.Position;
+                Plugin.Geolocator.Abstractions.Position position = e.Position;
 
-                if(CPosition != e.Position)
+                if (Cposition != e.Position)
                 {
-                    CPosition = e.Position;
+                    Cposition = e.Position;
                     mainmap.MoveToRegion(MapSpan.FromCenterAndRadius(new Xamarin.Forms.Maps.Position(position.Latitude, position.Longitude), Distance.FromMiles(1)).WithZoom(2));
 
                     loader.IsVisible = false;
@@ -488,11 +627,15 @@ namespace NasiyeDriver.Views
                     local.Lat = position.Latitude;
                     local.Lng = position.Longitude;
 
-                    string auth = await DependencyService.Get<IFirebaseAuthInterface>().GetCurrentUser();
-
-                    if (auth != null)
+                   
+                    if (Trip.Key != null)
                     {
-                        DependencyService.Get<IFirebaseDBInterface>().UpdateTripDriverLocation(auth, local);
+                        _firebaseDatabase.UpdateTripDriverLocation(Trip.Key, local);
+
+                        if(Trip.Status == "Started")
+                        {
+                            _firebaseDatabase.UpdateTripLocation(Trip.Key, local);
+                        }
                     }
                 }
 
@@ -500,68 +643,91 @@ namespace NasiyeDriver.Views
             });
         }
 
-        // Update Trip Info
 
 
 
-        private void DistanceUpdate(bool v)
+        private void DistanceUpdate(bool w = false)
+        {
+            Device.StartTimer(new TimeSpan(0, 0, 10), () =>
+            {
+                UpdateDistance();
+                return w;
+            });
+        }
+
+        private async  void UpdateDistance()
         {
             // Get Trip Location
 
             Models.Location SLocal = Trip.Location;
 
+            Models.Location local = new Models.Location();
+
             Xamarin.Essentials.Location startTrip = new Xamarin.Essentials.Location(SLocal.Lat, SLocal.Lng);
 
+            Models.Location NowLocal = new Models.Location();
 
-
-            Device.StartTimer(new TimeSpan(0, 0, 1), () =>
+            try
             {
-                Models.Location DLocal = Trip.Driver.Location;
-                Xamarin.Essentials.Location OnTrip = new Xamarin.Essentials.Location(DLocal.Lat, DLocal.Lng);
+                var request = new GeolocationRequest(GeolocationAccuracy.High);
+
+                var location = await Geolocation.GetLocationAsync(request);
 
 
-                double distance = Xamarin.Essentials.Location.CalculateDistance(startTrip, OnTrip, DistanceUnits.Kilometers);
-
-                if (distance > 1.0)
+                if (location != null)
                 {
+                    local.Lat = location.Latitude;
+                    local.Lng = location.Longitude;
+
+                    Xamarin.Essentials.Location OnTrip = new Xamarin.Essentials.Location(local.Lat, local.Lng);
+
+                    double distance = Xamarin.Essentials.Location.CalculateDistance(startTrip, OnTrip, DistanceUnits.Kilometers);
+
+
                     double oDistance = double.Parse(Trip.Distance);
+
                     double total = oDistance + distance;
-                    _firebaseDatabase.UpdateTripDistance(Trip.Key, total.ToString());
+
+                    _firebaseDatabase.UpdateTripDistance(Trip.Key, Math.Round(total, 2).ToString());
+
+                    GetCurrentLocation();
                 }
+            }
+            catch (Exception ex)
+            {
+                // Unable to get location
 
+                await DisplayAlert(ex.Source, "ERROR: " + ex.Message, "OK");
 
-                return v;
-            });
-
-
-
+            }
         }
 
         private void UpdateDuration(bool w = true)
         {
-            Device.StartTimer(new TimeSpan(0, 0, 1), () =>
+
+            Device.StartTimer(new TimeSpan(0, 1, 0 ), () =>
             {
-                TimeSpan ts = stopwatch.Elapsed;
                 int durationt = int.Parse(Trip.Duration);
-                int d = durationt + ts.Minutes;
 
-                string time = d + ":" + ts.Seconds;
+                durationt++;
 
-                timer.Text = time;
-                _firebaseDatabase.UpdateTripDuration(Trip.Key, d.ToString());
+                timer.Text = durationt.ToString() +":00";
+
+                _firebaseDatabase.UpdateTripDuration(Trip.Key, durationt.ToString());
+
                 return w;
             });
         }
 
         private void UpdatePausedTime(bool w = true)
         {
-            Device.StartTimer(new TimeSpan(0, 0, 1), () =>
+            Device.StartTimer(new TimeSpan(0, 1, 0), () =>
             {
-                TimeSpan ts = stopwatch.Elapsed;
                 int durationt = int.Parse(Trip.PauseTime);
-                int d = durationt + ts.Minutes;
 
-                string time = d +":"+ ts.Seconds;
+                int d = durationt + 1;
+
+                string time = d.ToString() +":00";
 
                 timer.Text = time;
 
@@ -570,56 +736,25 @@ namespace NasiyeDriver.Views
             });
         }
 
-        private void UpdateAmount(bool v)
-        {
 
-            // Get Current Amount
-
-            double cAmount = double.Parse(Trip.Amount);
-
-
-           // Get Distance 
-
-            double cDistance = double.Parse(Trip.Distance);
-
-            // GEt Duration
-
-            double cDuration = double.Parse(Trip.Duration);
-
-            // Get Pasued Time
-
-            int cPauseTime = int.Parse(Trip.PauseTime);
-
-
-            // Check if DIstance is Greater than 1.5 km
-
-            if(cDistance > 1.5)
-            {
-                // Calculate
-                double ccDitance = cDistance - 1.5;
-
-                // Ditance amount 
-
-                double cDAMount = ccDitance * 0.5;
-
-                if(cPauseTime != 0)
-                {
-                    double ccPauseTime = cPauseTime * 0.05;
-
-                    cDAMount += ccPauseTime;
-                }
-
-                // UPdate Amount 
-
-                _firebaseDatabase.UpdateTripAmount(Trip.Key, cDAMount.ToString());
-                
-            }
-
-        }
-
+        
         protected override bool OnBackButtonPressed()
         {
             return true;
+        }
+
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+            GetTrip();
+        }
+
+        protected override void OnDisappearing()
+        {
+            base.OnDisappearing();
+
+            cdata = "";
+
         }
     }
 }

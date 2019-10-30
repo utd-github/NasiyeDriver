@@ -3,9 +3,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:maps="clr-namespace:Xamarin.Forms.Maps;assembly=Xamarin.Forms.Maps"
              xmlns:local="clr-namespace:NasiyeDriver.CustomRenderers"
              mc:Ignorable="d"
+             xmlns:ffimageloading="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
+             xmlns:fftransformations="clr-namespace:FFImageLoading.Transformations;assembly=FFImageLoading.Transformations"
              Title="Loading..."
              x:Name="container"
              x:Class="NasiyeDriver.Views.HomePage">
@@ -15,25 +16,18 @@
             <local:CustomMap
                   x:Name="mainmap"
                   MapType="Street"
-                  IsShowingUser="False"
-                  IsVisible="False"
+                  IsShowingUser="True"
+                  
                   AbsoluteLayout.LayoutBounds=".5,0,500,800"
                  />
             
             <ActivityIndicator x:Name="maploading"
-                                   IsRunning="True"
-                                   AbsoluteLayout.LayoutFlags="All"
-                                   AbsoluteLayout.LayoutBounds=".5,.5,.25,.25"
-                                   HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand" />
+                                IsRunning="True"
+                               IsVisible="False"
+                                AbsoluteLayout.LayoutFlags="All"
+                                AbsoluteLayout.LayoutBounds=".5,.5,.25,.25"
+                                HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand" />
 
-            <ImageButton    AbsoluteLayout.LayoutBounds=".95,.800,.15,.10" 
-                            AbsoluteLayout.LayoutFlags="All"
-                            x:Name="geo"
-                            IsEnabled="False"
-                            Source="Assets/geo.png"
-                            BackgroundColor="Transparent"
-                            Clicked="Geo_Clicked"
-                            />
             <Frame AbsoluteLayout.LayoutBounds=".5,.999,.99,.15" 
                    AbsoluteLayout.LayoutFlags="All"
                    BackgroundColor="White" 
@@ -62,7 +56,7 @@
                             <ColumnDefinition Width="40*" />
                             <ColumnDefinition Width="30*" />
                         </Grid.ColumnDefinitions>
-                        <Image x:Name="userimage"
+                        <ffimageloading:CachedImage x:Name="userimage"
                                Grid.Column="0"
                                Source="Assets/image.png"
                                HeightRequest="100"
@@ -115,10 +109,11 @@
                                 HorizontalOptions="CenterAndExpand"
                                 BackgroundColor="AliceBlue"
                                 Padding="0">
-                            <Image x:Name="userImage"
-                                   Aspect="AspectFill"
-                                   Source="Assets/image.png"
-                                   Margin="0"/>
+                            <ffimageloading:CachedImage LoadingPlaceholder="Assets/image.png" x:Name="ruserimage" Aspect="AspectFill" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand" >
+                                <ffimageloading:CachedImage.Transformations>
+                                    <fftransformations:CircleTransformation />
+                                </ffimageloading:CachedImage.Transformations>
+                            </ffimageloading:CachedImage>
                         </Frame>
                         
                         <Label Text="Customer Name" 

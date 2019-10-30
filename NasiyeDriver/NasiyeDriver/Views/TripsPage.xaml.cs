@@ -1,7 +1,9 @@
 ﻿using NasiyeDriver.Models;
 using NasiyeDriver.Services;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,96 +18,117 @@ namespace NasiyeDriver.Views
     {
         public readonly IFirebaseAuthInterface _firebaseAuth;
         public readonly IFirebaseDBInterface _firebaseDatabase;
-
+        ObservableCollection<TripModel> Trips;
+        string cdata;
         public TripsPage()
         {
             InitializeComponent();
 
-
             _firebaseDatabase = DependencyService.Get<IFirebaseDBInterface>();
 
             _firebaseAuth = DependencyService.Get<IFirebaseAuthInterface>();
-
-
         }
 
 
 
-        private void GetTrips()
+        private async void GetTrips()
         {
-            List<TripModel> tripsCollection = new List<TripModel>();
+            string uid = await _firebaseAuth.GetCurrentUser();
 
-            Action<Dictionary<string, TripModel>> onValueEvent = (Dictionary<string, TripModel> trips) =>
+          
+
+            _firebaseDatabase.GetSavedTrips(uid);
+
+            MessagingCenter.Subscribe<object, string>(this, "savedtrips", (sender, data) =>
             {
-                try
-                {
-                    System.Diagnostics.Debug.WriteLine("---> EVENT GetDataFromFirebase ");
-
-                    Action onSetValueSuccess = () =>
+               
+                    if (data == null)
                     {
+                        ShowList(null);
 
-                    };
-
-                    Action<string> onSetValueError = (string errorDesc) =>
-                    {
-
-                    };
-
-                    if (trips != null)
-                    {
-                        info.IsVisible = false;
-
-                        if (trips.Count != 0 && trips.Count != tripsCollection.Count)
-                        {
-
-                            tripsCollection.Clear();
-
-                            foreach (KeyValuePair<string, TripModel> item in trips)
-                            {
-                                if (tripsCollection.All(d => d.Key != item.Value.Key))
-                                {
-                                    tripsCollection.Add(new TripModel
-                                    {
-                                        Location = item.Value.Location,
-                                        Amount = "$ " + item.Value.Amount,
-                                        Date = item.Value.Date,
-                                        Distance = item.Value.Distance + "KM",
-                                        Driver = item.Value.Driver,
-                                        Duration = item.Value.Duration + " mins",
-                                        Info = item.Value.Info,
-                                        Key = item.Value.Key,
-                                        Payment = item.Value.Payment,
-                                        Rating = item.Value.Rating,
-                                        Status = item.Value.Status,
-                                        Time = item.Value.Time,
-                                        Type = item.Value.Type,
-                                        User = item.Value.User
-                                    });
-                                }
-                            }
-
-                            tripsList.IsRefreshing = false;
-                            tripsList.ItemsSource = tripsCollection;
-                        }
                     }
                     else
                     {
-                        tripsCollection.Clear();
-                        tripsList.IsRefreshing = false;
-                        tripsList.IsVisible = false;
-                        info.IsVisible = true;
+                        ShowList(ToTripCOllection(data));
+                    }
+              
+                
+            });
+        }
+
+        private void ShowList(ObservableCollection<TripModel> trips)
+        {
+            if (trips != null)
+            {
+               
+                tripsList.ItemsSource = trips;
+                info.IsVisible = false;
+            }
+            else
+            {
+                tripsList.IsVisible = false;
+                info.IsVisible = true;
+            }
+        }
+
+        private ObservableCollection<TripModel> ToTripCOllection(string data)
+        {
+
+            if (data != "")
+            {
+                
+
+                
+            try
+            {
+                    ObservableCollection<TripModel> trips = new ObservableCollection<TripModel>();
+
+
+                    Dictionary<string, object> Data = JsonConvert.DeserializeObject<Dictionary<string, object>>(data);
+
+                    TripModel trip = new TripModel();
+
+                    foreach (KeyValuePair<string, object> item in Data.ToList())
+
+                    {
+                        TripModel ctrip = JsonConvert.DeserializeObject<TripModel>(item.Value.ToString());
+                        trips.Add(new TripModel
+                        {
+                            Key = ctrip.Key,
+                            Amount = "$ " + ctrip.Amount,
+                            Date = ctrip.Date,
+                            Distance = ctrip.Distance,
+                            Driver = ctrip.Driver,
+                            DriverKey = ctrip.DriverKey,
+                            Duration = ctrip.Duration + " Mins",
+                            Info = ctrip.Info,
+                            Location = ctrip.Location,
+                            PauseTime = ctrip.PauseTime,
+                            Payment = ctrip.Payment,
+                            Rating = ctrip.Rating,
+                            Status = ctrip.Status,
+                            Time = ctrip.Time,
+                            Type = ctrip.Type,
+                            User = ctrip.User,
+                            UserKey = ctrip.UserKey,
+                        });
                     }
 
-                }
-                catch (Exception ex)
-                {
 
-                    System.Diagnostics.Debug.WriteLine("---> error GetDataFromFirebase " + ex.Message + " , Source" + ex.Source);
-                    throw;
-                }
-            };
+                    Trips = trips;
 
-            _firebaseDatabase.GetSavedTrips("trips", onValueEvent);
+                return trips;
+
+            }
+            catch (Exception ex)
+            {
+                DisplayAlert("Trips", "Error: " + ex.Message, "OK");
+
+                return null;
+            }
+
+            }
+            return null;
         }
 
         private void TripsList_ItemSelected(object sender, SelectedItemChangedEventArgs e)
@@ -116,14 +139,14 @@ namespace NasiyeDriver.Views
         protected override void OnAppearing()
         {
             base.OnAppearing();
-
+            
             GetTrips();
         }
 
         protected override void OnDisappearing()
         {
             base.OnDisappearing();
-            _firebaseDatabase.RemoveGetSavedTrips("trips");
+            cdata = "";
         }
     }
 }

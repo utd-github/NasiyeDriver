@@ -34,6 +34,7 @@ namespace NasiyeDriver.Views
 
         RequestModel Mrequest;
 
+        UserModel UserModel;
 
         public HomePage()
         {
@@ -47,8 +48,9 @@ namespace NasiyeDriver.Views
 
             MessagingCenter.Subscribe<object, object>(this, "profile", (sender, data) =>
             {
-                UserModel user = data as UserModel;
-                SetStatusAsync(user);
+                UserModel = data as UserModel;
+
+                SetStatusAsync(UserModel);
             });
 
             MessagingCenter.Subscribe<object, object>(this, "request", (sender, data) =>
@@ -204,25 +206,32 @@ namespace NasiyeDriver.Views
         private async void SetStatusAsync(UserModel user)
         {
             container.Title = user.Status;
-            GetUserLocation();
+            GetUserLocation(user.Location);
             if (user.Status == "Offline")
             {
+                
                 // Hide Loader
-                await StartTrackingAsync(false);
+              await  StartTrackingAsync(false);
 
                 loader.IsVisible = false;
                 infobox.IsVisible = false;
-
+                mainmap.IsShowingUser = true;
                 getOnline.IsVisible = true;
                 getOnline.IsEnabled = true;
 
             }
             else if (user.Status == "Busy")
             {
+               await  StartTrackingAsync(false);
+
                 // get Request
+
             }
             else if(user.Status == "Online")
             {
+                VibrateNow(1);
+                mainmap.IsShowingUser = false;
+
                 getOnline.IsVisible = false;
                 loader.IsVisible = false;
                 userimage.Source = ImageSource.FromUri(new Uri(user.Image));
@@ -232,11 +241,30 @@ namespace NasiyeDriver.Views
                 getoffline.IsEnabled = true;
                 infobox.IsVisible = true;
                 //StartUpudatingLocation
-                await StartTrackingAsync(true);
+                StartTrackingAsync(true);
             }
         }
 
+        private void VibrateNow(int dur)
+        {
+                try
+                {
+                    // Use default vibration length
+                    Vibration.Vibrate();
 
+                    // Or use specified time
+                    var duration = TimeSpan.FromSeconds(dur);
+                    Vibration.Vibrate(duration);
+                }
+                catch (FeatureNotSupportedException ex)
+                {
+                    // Feature not supported on device
+                }
+                catch (Exception ex)
+                {
+                    // Other error has occurred.
+                }
+        }
 
         private async Task StartTrackingAsync(bool tracking)
         {
@@ -275,23 +303,24 @@ namespace NasiyeDriver.Views
                                     PauseLocationUpdatesAutomatically = false
                                 }))
                             {
-                                
+
                                 tracking = true;
                             }
                         }
 
-                    }else
+                    }
+                    else
                     {
                         CrossGeolocator.Current.PositionChanged -= CrossGeolocator_Current_PositionChanged;
                         CrossGeolocator.Current.PositionError -= CrossGeolocator_Current_PositionError;
 
                         await CrossGeolocator.Current.StopListeningAsync();
-                      
+
 
                         tracking = false;
 
                     }
-                   
+
                 }
                 else
                 {
@@ -305,79 +334,74 @@ namespace NasiyeDriver.Views
                 // Error Accured
                 await DisplayAlert("Location Error", "Error Getting Location: " + ex.Message, "OK");
             }
-
-
-
         }
 
         private void CrossGeolocator_Current_PositionError(object sender, PositionErrorEventArgs e)
         {
-         
+
         }
 
         private void CrossGeolocator_Current_PositionChanged(object sender, PositionEventArgs e)
+        {
+            Device.BeginInvokeOnMainThread(async () =>
             {
-                Device.BeginInvokeOnMainThread(async () =>
-                {
-                    Models.Location local = new Models.Location();
+                Models.Location local = new Models.Location();
 
-                    var position = e.Position;
-                    mainmap.MoveToRegion(MapSpan.FromCenterAndRadius(
-                        new Xamarin.Forms.Maps.Position(
-                            position.Latitude, position.Longitude), 
-                            Distance.FromMiles(1)).WithZoom(2)
-                            );
+                var position = e.Position;
 
-                    local.Lat = position.Latitude;
-                    local.Lng = position.Longitude;
+                mainmap.MoveToRegion(MapSpan.FromCenterAndRadius(
+                    new Xamarin.Forms.Maps.Position(
+                        position.Latitude, position.Longitude),
+                        Distance.FromMiles(1)).WithZoom(2)
+                        );
 
-                    var uid = await DependencyService.Get<IFirebaseAuthInterface>().GetCurrentUser();
+                local.Lat = position.Latitude;
+                local.Lng = position.Longitude;
+                mainmap.IsVisible = true;
+                maploading.IsVisible = false;
 
-                    DependencyService.Get<IFirebaseDBInterface>().UpdateTripDriverLocation(uid,local);
-                });
-            }
+                DependencyService.Get<IFirebaseDBInterface>().UpdateDriverLocation(await DependencyService.Get<IFirebaseAuthInterface>().GetCurrentUser(), local);
 
+                GetUserLocation(local);
+            });
+        }
 
-
-        private async void GetUserLocation()
+        private async void GetUserLocation(Models.Location location)
         {
             try
             {
-                Xamarin.Essentials.Location location = await Geolocation.GetLastKnownLocationAsync();
                 if (location != null)
                 {
                     mainmap.MoveToRegion(MapSpan.FromCenterAndRadius(
-                        new Xamarin.Forms.Maps.Position(location.Latitude, location.Longitude), 
+                        new Xamarin.Forms.Maps.Position(location.Lat, location.Lng),
                         Distance.FromMiles(1)).WithZoom(2));
 
-                    maploading.IsVisible = false;
+                    loader.IsVisible = false;
                     mainmap.IsVisible = true;
-                    geo.IsEnabled = true;
                 }
             }
             catch (FeatureNotSupportedException fnsEx)
             {
                 // Handle not supported on device exception
-                await DisplayAlert("Error", "Sorry, Maps not supported!", "OK");
+                await DisplayAlert("Location", "Sorry, Maps not supported!", "OK");
             }
             catch (FeatureNotEnabledException fneEx)
             {
                 // Handle not enabled on device exception
-                await DisplayAlert("Error", "Sorry, Maps not enabled!", "OK");
-
+                await DisplayAlert("Location", "Sorry, Maps not enabled!", "OK");
             }
             catch (PermissionException pEx)
             {
                 // Handle permission exception
-                await DisplayAlert("Error", "Sorry, Maps need permission", "OK");
-
+                await DisplayAlert("Location", "Sorry, Maps need permission", "OK");
             }
             catch (Exception ex)
             {
                 // Unable to get location
-                await DisplayAlert("Error", "Sorry, Unable to get location! ERROR: " + ex.Message, "OK");
+                await DisplayAlert(ex.Source, "ERROR: " + ex.Message, "OK");
             }
         }
+
 
         private async void GetOnline_Clicked(object sender, EventArgs e)
         {
@@ -406,16 +430,25 @@ namespace NasiyeDriver.Views
             }
         }
 
-
         private void GetRequestData(RequestModel req)
         {
             reqpopup.IsVisible = true;
+            VibrateNow(60);
+
+            ruserimage.Source = new UriImageSource
+            {
+                Uri = new Uri(req.User.Image)
+            };
 
             username.Text = req.User.Name;
+
             timer.Text = "60 Secs";
 
+            ShowTimer(true);
+        }
 
-
+        private void ShowTimer(bool v)
+        {
             int secs = 60;
             Device.StartTimer(new TimeSpan(0, 0, 1), () =>
             {
@@ -434,57 +467,14 @@ namespace NasiyeDriver.Views
                 {
                     timer.Text = secs + "Secs";
                 }
-                return true;
+                return v;
             });
-
-           
-           
-        }
-
-
-        private async void Geo_Clicked(object sender, EventArgs e)
-        {
-            try
-            {
-                Xamarin.Essentials.Location location = await Geolocation.GetLastKnownLocationAsync();
-                if (location != null)
-                {
-                    mainmap.MoveToRegion(MapSpan.FromCenterAndRadius(
-                        new Xamarin.Forms.Maps.Position(location.Latitude, location.Longitude),
-                        Distance.FromMiles(1)).WithZoom(2));
-
-                    maploading.IsVisible = false;
-                    mainmap.IsVisible = true;
-                    geo.IsEnabled = true;
-                }
-            }
-            catch (FeatureNotSupportedException fnsEx)
-            {
-                // Handle not supported on device exception
-                await DisplayAlert("Error", "Sorry, Maps not supported!", "OK");
-            }
-            catch (FeatureNotEnabledException fneEx)
-            {
-                // Handle not enabled on device exception
-                await DisplayAlert("Error", "Sorry, Maps not enabled!", "OK");
-
-            }
-            catch (PermissionException pEx)
-            {
-                // Handle permission exception
-                await DisplayAlert("Error", "Sorry, Maps need permission", "OK");
-
-            }
-            catch (Exception ex)
-            {
-                // Unable to get location
-                await DisplayAlert("Error", "Sorry, Unable to get location! ERROR: " + ex.Message, "OK");
-            }
         }
 
         private async void Accept_Clicked(object sender, EventArgs e)
         {
             reqpopup.IsVisible = false;
+            ShowTimer(false);
 
             string uid = await _firebaseAuth.GetCurrentUser();
 
@@ -508,7 +498,7 @@ namespace NasiyeDriver.Views
                 Trip.Date = Mrequest.Date;
                 Trip.Location = Mrequest.Driver.Location;
 
-                Trip.Distance = "1";
+                Trip.Distance = "0";
                 Trip.Status = "Accepted";
 
                 Trip.Duration = "0";
@@ -516,13 +506,21 @@ namespace NasiyeDriver.Views
                 Trip.PauseTime = "0";
                 Trip.Amount = "1.5";
                 Trip.Payment = "Cash";
-
+                Trip.DriverKey = Mrequest.Driver.Key;
+                Trip.UserKey = Mrequest.User.Key;
                // Start Trip and navigate to ongoing page
                var key = await _firebaseDatabase.StartTrip(Trip.Driver.Key, Trip);
 
                 if (key != null)
                 {
+                    ShowTimer(false);
+
                     App.Current.MainPage = new NavigationPage(new TripPage(key));
+                }
+                else
+                {
+
+                    Cancel_Clicked(null, null);
                 }
             }
 
@@ -539,26 +537,24 @@ namespace NasiyeDriver.Views
             }
         }
 
-
-
         protected override bool OnBackButtonPressed()
         {
             return base.OnBackButtonPressed();
         }
 
-        protected override void OnAppearing()
-        {
-            base.OnAppearing();
-
+        protected async override void OnAppearing()
+        {     
             GetDrivers();
-            GetUserLocation();
+           await StartTrackingAsync(true);
         }
 
-        protected override void OnDisappearing()
+        protected async override void OnDisappearing()
         {
             base.OnDisappearing();
+            await StartTrackingAsync(false);
 
-        }
+            _firebaseDatabase.GetOffline(await _firebaseAuth.GetCurrentUser());
+        }   
 
 
     }

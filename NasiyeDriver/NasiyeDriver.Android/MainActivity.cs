@@ -15,14 +15,15 @@ using Plugin.Permissions;
 using System.Threading.Tasks;
 using System.IO;
 using Plugin.LocalNotifications;
+using Android.Content.Res;
 
 namespace NasiyeDriver.Droid
 {
     [Activity(Label = "NasiyeDriver", 
         Icon = "@mipmap/icon", 
         Theme = "@style/Splashscreen", 
-        MainLauncher = true, 
-        ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
+        MainLauncher = true,
+        ScreenOrientation = ScreenOrientation.Portrait)]
 
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
@@ -56,10 +57,11 @@ namespace NasiyeDriver.Droid
 
             Rg.Plugins.Popup.Popup.Init(this, savedInstanceState);
 
+            FFImageLoading.Forms.Platform.CachedImageRenderer.Init(enableFastRenderer: true);
 
             CrossCurrentActivity.Current.Init(this, savedInstanceState);
-            LocalNotificationsImplementation.NotificationIconId = Resource.Drawable.logo;
-
+            LocalNotificationsImplementation.NotificationIconId = Resource.Drawable.icon;
+            
             LoadApplication(new App());
 
         }
@@ -72,6 +74,18 @@ namespace NasiyeDriver.Droid
             PermissionsImplementation.Current.OnRequestPermissionsResult(requestCode, permissions, grantResults);
 
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+
+        public override Android.Content.Res.Resources Resources
+        {
+            get
+            {
+                var config = new Configuration();
+
+                config.SetToDefaults();
+
+                return CreateConfigurationContext(config).Resources;
+            }
         }
 
         public override void OnBackPressed()
